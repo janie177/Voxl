@@ -81,24 +81,30 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="IClient.h" />
-    <ClInclude Include="IGameMode.h" />
-    <ClInclude Include="IServer.h" />
-    <ClInclude Include="IVoxelEditor.h" />
-    <ClInclude Include="IWorld.h" />
-    <ClInclude Include="IWorldGenerator.h" />
-    <ClInclude Include="VoxelRegistry.h" />
-    <ClInclude Include="Utility.h" />
-    <ClInclude Include="VoxelData.h" />
-    <ClInclude Include="VoxelInfo.h" />
-    <ClInclude Include="IChunk.h" />
-    <ClInclude Include="IChunkMesh.h" />
-    <ClInclude Include="IChunkStore.h" />
-    <ClInclude Include="IParticleEffect.h" />
-    <ClInclude Include="IRenderer.h" />
-    <ClInclude Include="ISkeletalMesh.h" />
-    <ClInclude Include="IStaticMesh.h" />
-    <ClInclude Include="IWindow.h" />
+    <ClInclude Include="Include/ConnectionState.h" />
+    <ClInclude Include="Include/IClient.h" />
+    <ClInclude Include="Include/IClientConnection.h" />
+    <ClInclude Include="Include/IGameMode.h" />
+    <ClInclude Include="Include/IPacketHandler.h" />
+    <ClInclude Include="Include/IPacketManager.h" />
+    <ClInclude Include="Include/IServer.h" />
+    <ClInclude Include="Include/IServerConnection.h" />
+    <ClInclude Include="Include/IVoxelEditor.h" />
+    <ClInclude Include="Include/IWorld.h" />
+    <ClInclude Include="Include/IWorldGenerator.h" />
+    <ClInclude Include="Include/PacketType.h" />
+    <ClInclude Include="Include/VoxelRegistry.h" />
+    <ClInclude Include="Include/Utility.h" />
+    <ClInclude Include="Include/VoxelData.h" />
+    <ClInclude Include="Include/VoxelInfo.h" />
+    <ClInclude Include="Include/IChunk.h" />
+    <ClInclude Include="Include/IChunkMesh.h" />
+    <ClInclude Include="Include/IChunkStore.h" />
+    <ClInclude Include="Include/IParticleEffect.h" />
+    <ClInclude Include="Include/IRenderer.h" />
+    <ClInclude Include="Include/ISkeletalMesh.h" />
+    <ClInclude Include="Include/IStaticMesh.h" />
+    <ClInclude Include="Include/IWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

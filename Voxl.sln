@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Voxl-API", "Voxl\Voxl.vcxproj", "{1022F0C7-0C88-4468-B81E-8A212BCA9C66}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Voxl-API", "Voxl-API\Voxl-API.vcxproj", "{1022F0C7-0C88-4468-B81E-8A212BCA9C66}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Voxl-Server", "Voxl-Server\Voxl-Server.vcxproj", "{D343BA7E-6466-4230-9632-0F897A0D8F2F}"
 EndProject

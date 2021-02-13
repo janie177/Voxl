@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace voxl
 {
@@ -10,11 +11,17 @@ namespace voxl
     class IGameMode;
     class IChunkStore;
     class VoxelRegistry;
+    class IClientConnection;
 
     class IServer
     {
     public:
         virtual ~IServer() = 0;
+
+        /*
+         * Initialize server systems.
+         */
+        virtual void Init() = 0;
 
         /*
          * Update the server, ticking and updating all worlds and game-modes.
@@ -55,5 +62,20 @@ namespace voxl
          * Get a reference to the voxel registry.
          */
         virtual VoxelRegistry& GetVoxelRegistry() = 0;
+
+        /*
+         * Get all currently connected clients.
+         */
+        virtual std::vector<IClientConnection*>& GetConnectedClients() = 0;
+
+        /*
+         * Process all connected clients.
+         */
+        virtual void ProcessClientConnections() = 0;
+
+        /*
+         * Called when a client connects to the server.
+         */
+        virtual void OnClientConnect() = 0;
     };
 }

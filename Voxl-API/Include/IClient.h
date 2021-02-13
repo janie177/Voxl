@@ -2,6 +2,7 @@
 
 namespace voxl
 {
+    class IServerConnection;
     class IChunkStore;
     class IRenderer;
 
@@ -21,7 +22,12 @@ namespace voxl
         virtual IRenderer& GetRenderer() = 0;
 
         /*
-         * The game's entry point.
+         * Get the connection handler.
+         */
+        virtual IServerConnection& GetConnection() = 0;
+
+        /*
+         * The clients entry point.
          */
         virtual void Run() = 0;
     };

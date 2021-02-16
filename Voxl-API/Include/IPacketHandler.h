@@ -2,7 +2,8 @@
 
 namespace voxl
 {
-    struct Packet;
+    struct IPacket;
+    class IConnection;
 
     /*
      * Class that takes packets with a specific ID and handles them.
@@ -15,7 +16,7 @@ namespace voxl
         /*
          * Resolve a packet.
          */
-        virtual void Resolve(Packet& a_Data) = 0;
+        virtual bool Resolve(IPacket& a_Data, IConnection* a_Sender) = 0;
     };
 
     /*
@@ -24,18 +25,20 @@ namespace voxl
     template<typename T>
     class PacketHandler : public IPacketHandler
     {
+        static_assert(std::is_base_of_v<IPacket, T>, "PacketHandler required template type that is derived from (IPacket.");
     public:
         /*
          * Resolve a packet of a specific type.
          */
-        virtual void OnResolve(T& a_Data) = 0;
+        virtual bool OnResolve(T& a_Data, IConnection* a_Sender) = 0;
 
         /*
          * Internal conversion function.
          */
-        void Resolve(Packet& a_Data) final override
+        bool Resolve(IPacket& a_Data, IConnection* a_Sender) final override
         {
-            OnResolve(static_cast<T*>(a_Data));
+            auto* derived = static_cast<T*>(&a_Data);
+            return OnResolve(*derived, a_Sender);
         }
     };
 }

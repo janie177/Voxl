@@ -102,6 +102,7 @@
     <ClInclude Include="DefaultGameMode.h" />
     <ClInclude Include="DefaultWorldGenerator.h" />
     <ClInclude Include="JsonUtilities.h" />
+    <ClInclude Include="PacketHandler_Authenticate.h" />
     <ClInclude Include="PacketManager.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="VoxelEditor.h" />

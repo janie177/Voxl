@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <vector>
 
 namespace voxl
@@ -24,13 +25,21 @@ namespace voxl
 
         /*
          * Get all currently connected clients.
+         * These pointers are not guaranteed to remain valid.
+         * The array of pointers may be generated every time this function is called.
          */
-        virtual std::vector<IClientConnection*>& GetConnectedClients() = 0;
+        virtual std::vector<IClientConnection*> GetConnectedClients() = 0;
 
         /*
          * Process all connected clients.
          */
         virtual void ProcessClientConnections() = 0;
+
+        /*
+         * Get the client with the given username if existing.
+         * If no client with that name exists, nullptr is returned.
+         */
+        virtual IClientConnection* GetClient(const std::string& a_Username) = 0;
 
         /*
          * Get the packet manager used to handle incoming packets.

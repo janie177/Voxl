@@ -4,19 +4,23 @@ namespace voxl
 {
     /*
      * All packet types with their internal IDs.
+     * Important: Unknown should be the last packed and each packet should have their natural enumeration int value.
      */
     enum class PacketType
     {
+        AUTHENTICATE = 0,
+
+        //UNKNOWN packet is always the last one to determine the amount of packets.
         UNKNOWN,
-        DUMMY
     };
 
     /*
      * Base packet class used for polymorphic passing in functions.
      */
-    struct Packet
+    struct IPacket
     {
-        Packet(PacketType a_Type) : type(a_Type) {}
+        virtual ~IPacket() = default;
+        IPacket(PacketType a_Type) : type(a_Type) {}
         PacketType type;
     };
 
@@ -24,17 +28,19 @@ namespace voxl
      * Typed packet class used as base and to statically link type and enumeration.
      */
     template<PacketType T>
-    struct PacketBase : public Packet
+    struct PacketBase : public IPacket
     {
-        PacketBase() : Packet(T) {}
+        PacketBase() : IPacket(T) {}
     };
 
     /*
-     * Dummy packet.
+     * The packet used for authentication.
+     * This should be the first packet that is sent by the client and received by the server.
      */
-    struct DummyPacket : public PacketBase<PacketType::DUMMY>
+    struct Packet_Authenticate : public PacketBase<PacketType::AUTHENTICATE>
     {
-        int test[10]; //10 test ints.
-        char chars[4]{'T', 'e', 's', 't'};
+        char name[255];         //Username
+
+        //TODO encryption and keys for verification.
     };
 }

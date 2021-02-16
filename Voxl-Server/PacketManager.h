@@ -1,12 +1,18 @@
 #pragma once
 #include <IPacketManager.h>
+#include <unordered_map>
 
 namespace voxl
 {
     class PacketManager : public IPacketManager
     {
     public:
-        void Register(PacketType a_Type, IPacketHandler* a_Handler) override;
-        void Resolve(PacketType a_Type, void* a_Data, IConnection* a_Sender) override;
+        PacketManager();
+
+        bool Resolve(PacketType a_Type, IPacket& a_Data, IConnection* a_Sender) override;
+        void Register(PacketType a_Type, std::unique_ptr<IPacketHandler>&& a_Handler) override;
+    private:
+        //Map containing all the registered packet handlers.
+        std::vector<std::unique_ptr<IPacketHandler>> m_Handlers;
     };
 };

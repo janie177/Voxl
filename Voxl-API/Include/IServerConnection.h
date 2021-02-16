@@ -6,7 +6,7 @@
 
 namespace voxl
 {
-    struct Packet;
+    struct IPacket;
     class IPacketManager;
 
     /*

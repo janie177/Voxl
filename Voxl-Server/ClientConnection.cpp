@@ -39,7 +39,7 @@ namespace voxl
         return std::string(name);
     }
 
-    void ClientConnection::SendPacket(Packet& a_Data, size_t a_Size)
+    void ClientConnection::SendPacket(IPacket& a_Data, size_t a_Size)
     {
         //Send the packet if connected still.
         if(m_State == ConnectionState::CONNECTED)
@@ -49,8 +49,19 @@ namespace voxl
         }
     }
 
+    std::string ClientConnection::GetUsername() const
+    {
+        return m_Username;
+    }
+
     ENetPeer* ClientConnection::GetPeer() const
     {
         return m_Peer;
+    }
+
+    void ClientConnection::SetUsername(const std::string& a_Name)
+    {
+        assert(a_Name.length() <= 255);
+        m_Username = a_Name;
     }
 }

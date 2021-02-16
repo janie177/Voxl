@@ -15,13 +15,20 @@ namespace voxl
         std::uint64_t GetLastResponse() override;
         std::uint64_t GetConnectionStartTime() override;
         std::string GetIp() override;
-        void SendPacket(Packet& a_Data, size_t a_Size) override;
+        void SendPacket(IPacket& a_Data, size_t a_Size) override;
+        std::string GetUsername() const override;
 
     public:
         ENetPeer* GetPeer() const;
 
+        /*
+         * Set this clients username.
+         */
+        void SetUsername(const std::string& a_Name);
+
     private:
         ENetPeer* m_Peer;
+        std::string m_Username;
         std::uint64_t m_FirstConnected;
         ConnectionState m_State;
     };

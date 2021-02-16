@@ -8,7 +8,7 @@
 namespace voxl
 {
     enum class PacketType;
-    struct Packet;
+    struct IPacket;
 
     /*
      * Interface for retrieving information about a connection.
@@ -46,7 +46,7 @@ namespace voxl
         /*
         * Send a packet to the client.
         */
-        virtual void SendPacket(Packet& a_Data, size_t a_Size) = 0;
+        virtual void SendPacket(IPacket& a_Data, size_t a_Size) = 0;
 
         /*
          * Send a packet to the client with type awareness.
@@ -54,7 +54,7 @@ namespace voxl
         template<typename T>
         void SendPacket(T& a_Data)
         {
-            static_assert(std::is_base_of_v<Packet, T>, "Can only send templated packet with a class derived from Packet.");
+            static_assert(std::is_base_of_v<IPacket, T>, "Can only send templated packet with a class derived from Packet.");
             SendPacket(&a_Data, sizeof(T));
         }
     };

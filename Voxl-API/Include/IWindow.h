@@ -22,7 +22,7 @@ namespace voxl
     class IWindow
     {
     public:
-        virtual ~IWindow() = 0;
+        virtual ~IWindow() = default;
 
         /*
          * Initialize the window.

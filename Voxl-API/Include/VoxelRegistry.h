@@ -21,6 +21,8 @@ namespace voxl
             m_VoxelTypes.resize(a_MaximumEntries);
         }
 
+        ~VoxelRegistry();
+
         template<typename T>
         inline const VoxelInfo& GetVoxelInfo(T a_Id)
         {
@@ -52,4 +54,9 @@ namespace voxl
         std::vector<VoxelInfo> m_VoxelTypes;
         std::uint32_t m_MaximumEntries;
     };
+
+    inline VoxelRegistry::~VoxelRegistry()
+    {
+
+    }
 }

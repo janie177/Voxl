@@ -4,7 +4,7 @@ namespace voxl
 {
     class IParticleEffect
     {
-        virtual ~IParticleEffect() = 0;
+        virtual ~IParticleEffect() = default;
 
         //TODO
     };

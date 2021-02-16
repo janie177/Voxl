@@ -4,7 +4,7 @@ namespace voxl
 {
     class ISkeletalMesh
     {
-        virtual ~ISkeletalMesh() = 0;
+        virtual ~ISkeletalMesh() = default;
         //TODO
     };
 }

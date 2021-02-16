@@ -4,10 +4,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Voxl-API", "Voxl-API\Voxl-API.vcxproj", "{1022F0C7-0C88-4468-B81E-8A212BCA9C66}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5B24628C-AB4D-4C40-AA43-82DFDC82B7E9} = {5B24628C-AB4D-4C40-AA43-82DFDC82B7E9}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Voxl-Server", "Voxl-Server\Voxl-Server.vcxproj", "{D343BA7E-6466-4230-9632-0F897A0D8F2F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5B24628C-AB4D-4C40-AA43-82DFDC82B7E9} = {5B24628C-AB4D-4C40-AA43-82DFDC82B7E9}
+		{1022F0C7-0C88-4468-B81E-8A212BCA9C66} = {1022F0C7-0C88-4468-B81E-8A212BCA9C66}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Voxl-Client", "Voxl-Client\Voxl-Client.vcxproj", "{17222E80-7CD1-433B-A4F3-FD5993179B58}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5B24628C-AB4D-4C40-AA43-82DFDC82B7E9} = {5B24628C-AB4D-4C40-AA43-82DFDC82B7E9}
+		{1022F0C7-0C88-4468-B81E-8A212BCA9C66} = {1022F0C7-0C88-4468-B81E-8A212BCA9C66}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Utilities", "Utilities\Utilities.vcxproj", "{5B24628C-AB4D-4C40-AA43-82DFDC82B7E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +48,12 @@ Global
 		{17222E80-7CD1-433B-A4F3-FD5993179B58}.Release|x64.ActiveCfg = Release|x64
 		{17222E80-7CD1-433B-A4F3-FD5993179B58}.Release|x64.Build.0 = Release|x64
 		{17222E80-7CD1-433B-A4F3-FD5993179B58}.Release|x86.ActiveCfg = Release|x64
+		{5B24628C-AB4D-4C40-AA43-82DFDC82B7E9}.Debug|x64.ActiveCfg = Debug|x64
+		{5B24628C-AB4D-4C40-AA43-82DFDC82B7E9}.Debug|x64.Build.0 = Debug|x64
+		{5B24628C-AB4D-4C40-AA43-82DFDC82B7E9}.Debug|x86.ActiveCfg = Debug|x64
+		{5B24628C-AB4D-4C40-AA43-82DFDC82B7E9}.Release|x64.ActiveCfg = Release|x64
+		{5B24628C-AB4D-4C40-AA43-82DFDC82B7E9}.Release|x64.Build.0 = Release|x64
+		{5B24628C-AB4D-4C40-AA43-82DFDC82B7E9}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

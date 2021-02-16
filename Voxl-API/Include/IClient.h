@@ -9,7 +9,7 @@ namespace voxl
     class IClient
     {
     public:
-        virtual ~IClient() = 0;
+        virtual ~IClient() = default;
 
         /*
          * Currently loaded chunks are stored here.

@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/vec3.hpp>
+#include <string>
 
 namespace voxl
 {
@@ -13,7 +14,7 @@ namespace voxl
     {
     public:
 
-        virtual ~IWorldGenerator() = 0;
+        virtual ~IWorldGenerator() = default;
 
         /*
          * Generate a chunk using the seed and its coordinates.
@@ -24,5 +25,10 @@ namespace voxl
          * Populate an already generated chunk using a seed.
          */
         virtual void Populate(const std::uint64_t a_Seed, IChunk& a_Chunk) = 0;
+
+        /*
+         * Get the name of this world generator.
+         */
+        virtual std::string GetName() const = 0;
     };
 }

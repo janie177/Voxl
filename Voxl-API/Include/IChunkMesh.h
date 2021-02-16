@@ -19,7 +19,7 @@ namespace voxl
     {
     public:
 
-        virtual ~IChunkMesh() = 0;
+        virtual ~IChunkMesh() = default;
 
         /*
          * Returns true when this chunk mesh has finished loading.

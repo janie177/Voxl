@@ -4,7 +4,7 @@
 
 namespace voxl
 {
-    class VoxelData;
+    struct VoxelData;
     class IChunkStore;
 
     /*
@@ -13,7 +13,7 @@ namespace voxl
     class IVoxelEditor
     {
     public:
-        virtual ~IVoxelEditor() = 0;
+        virtual ~IVoxelEditor() = default;
 
         /*
          * Queue multiple voxel updates in a region using a custom function.

@@ -81,6 +81,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Include/IConnection.h" />
     <ClInclude Include="Include/ConnectionState.h" />
     <ClInclude Include="Include/IClient.h" />
     <ClInclude Include="Include/IClientConnection.h" />
@@ -105,6 +106,7 @@
     <ClInclude Include="Include/ISkeletalMesh.h" />
     <ClInclude Include="Include/IStaticMesh.h" />
     <ClInclude Include="Include/IWindow.h" />
+    <ClInclude Include="Include\IConnectionManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

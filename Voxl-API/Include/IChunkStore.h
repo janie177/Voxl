@@ -11,33 +11,32 @@ namespace voxl
      * ChunkStore stores chunks of the given type.
      * Functionality to iterate over the chunks is provided in the form of iterators.
      */
-    template<typename T>
     class IChunkStore
     {
-        static_assert(std::is_base_of_v<IChunk, T>, "T needs to be of type IChunk.");
     public:
         //used to iterate over chunks.
-        typedef T* iterator;
-        typedef const T* const_iterator;
+        typedef IChunk* iterator;
+        typedef const IChunk* const_iterator;
 
     public:
-        virtual ~IChunkStore() = 0;
+        virtual ~IChunkStore() = default;
 
         /*
          * Get the chunk at the given chunk coordinates.
          * If the chunk is not loaded, returns nullptr.
          */
-        virtual T* GetChunk(const glm::ivec3& a_Coordinates) = 0;
+        virtual IChunk* GetChunk(const glm::ivec3& a_Coordinates) = 0;
 
         /*
          * Store the given chunk in memory.
          */
-        virtual void LoadChunk(std::unique_ptr<T>&& a_Chunk) = 0;
+        virtual IChunk* LoadChunk(std::unique_ptr<IChunk>&& a_Chunk) = 0;
 
         /*
          * Unload the chunk at the given coordinates from memory.
+         * Returns true if the chunk was unloaded. False if not loaded in the first place.
          */
-        virtual void UnloadChunk(const glm::ivec3& a_Coordinates) = 0;
+        virtual bool UnloadChunk(const glm::ivec3& a_Coordinates) = 0;
 
         /*
          * Unload all chunks in this chunk store.

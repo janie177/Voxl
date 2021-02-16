@@ -23,6 +23,7 @@ namespace voxl
     class IChunk
     {
     public:
+        virtual ~IChunk() = default;
         /*
          * Get the Chunks X, Y and Z coordinates in the world.
          */
@@ -39,9 +40,19 @@ namespace voxl
         virtual VoxelData* GetVoxelData() = 0;
 
         /*
+         * Get a const pointer to the array of voxels in this chunk.
+         */
+        virtual VoxelData const* GetVoxelData() const = 0;
+
+        /*
          * Save the chunk for the given world.
          */
-        virtual void Save(IWorld* a_World) = 0;
+        virtual void Save(IWorld& a_World) = 0;
+
+        /*
+         * Perform operations when the chunk is unloaded from memory.
+         */
+        virtual void Unload(IWorld& a_World) = 0;
 
         /*
          * Returns true when this chunk has been changed and requires synchronization.

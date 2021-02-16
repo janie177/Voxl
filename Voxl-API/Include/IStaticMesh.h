@@ -4,7 +4,7 @@ namespace voxl
 {
     class IStaticMesh
     {
-        virtual ~IStaticMesh() = 0;
+        virtual ~IStaticMesh() = default;
         //TODO
     };
 }

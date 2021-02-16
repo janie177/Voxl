@@ -15,76 +15,82 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="IWindow.h">
+    <ClInclude Include="Include/ConnectionState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IRenderer.h">
+    <ClInclude Include="Include/IClient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IParticleEffect.h">
+    <ClInclude Include="Include/IClientConnection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IStaticMesh.h">
+    <ClInclude Include="Include/IGameMode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ISkeletalMesh.h">
+    <ClInclude Include="Include/IPacketHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IChunkMesh.h">
+    <ClInclude Include="Include/IPacketManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utility.h">
+    <ClInclude Include="Include/IServer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VoxelRegistry.h">
+    <ClInclude Include="Include/IServerConnection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VoxelInfo.h">
+    <ClInclude Include="Include/IVoxelEditor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VoxelData.h">
+    <ClInclude Include="Include/IWorld.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IChunk.h">
+    <ClInclude Include="Include/IWorldGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IChunkStore.h">
+    <ClInclude Include="Include/PacketType.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IClient.h">
+    <ClInclude Include="Include/VoxelRegistry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IServer.h">
+    <ClInclude Include="Include/Utility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IWorld.h">
+    <ClInclude Include="Include/VoxelData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IGameMode.h">
+    <ClInclude Include="Include/VoxelInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IWorldGenerator.h">
+    <ClInclude Include="Include/IChunk.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IVoxelEditor.h">
+    <ClInclude Include="Include/IChunkMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IServerConnection.h">
+    <ClInclude Include="Include/IChunkStore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ConnectionState.h">
+    <ClInclude Include="Include/IParticleEffect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IPacketManager.h">
+    <ClInclude Include="Include/IRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IPacketHandler.h">
+    <ClInclude Include="Include/ISkeletalMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PacketType.h">
+    <ClInclude Include="Include/IStaticMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IClientConnection.h">
+    <ClInclude Include="Include/IWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\IConnectionManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IConnection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

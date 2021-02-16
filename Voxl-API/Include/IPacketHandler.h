@@ -10,7 +10,7 @@ namespace voxl
     class IPacketHandler
     {
     public:
-        virtual ~IPacketHandler() = 0;
+        virtual ~IPacketHandler() = default;
 
         /*
          * Resolve a packet.

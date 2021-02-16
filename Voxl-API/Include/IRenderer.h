@@ -69,7 +69,7 @@ namespace voxl
     {
     public:
 
-        virtual ~IRenderer() = 0;
+        virtual ~IRenderer() = default;
 
         /*
          * Initialize the rendering system.

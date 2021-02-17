@@ -33,6 +33,16 @@ int main()
         if(input == "stop")
         {
             server->ShutDown(true);
+
+            //Wait for actual shutdown.
+            while(true)
+            {
+                if(server->GetState() == voxl::ServerState::SHUT_DOWN)
+                {
+                    std::cin.ignore();
+                    break;
+                }
+            }
         }
 
         input.clear();

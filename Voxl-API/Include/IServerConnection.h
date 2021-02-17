@@ -2,6 +2,7 @@
 #include <string>
 
 #include "ConnectionState.h"
+#include "IConnection.h"
 #include "PacketType.h"
 
 namespace voxl
@@ -13,7 +14,7 @@ namespace voxl
      * An interface to handle a connection from client to server.
      * Offers functionality to listen to packets and process them.
      */
-    class IServerConnection
+    class IServerConnection : public IConnection
     {
     public:
         /*

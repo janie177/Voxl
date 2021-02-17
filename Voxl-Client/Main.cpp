@@ -1,8 +1,9 @@
-#include "time/GameLoop.h"
+#include "Client.h"
 
 int main()
 {
-    utilities::GameLoop loop{144, 30};
+    std::unique_ptr<voxl::Client> client = std::make_unique<voxl::Client>();
+    client->Start();
 
     return 0;
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <glm/glm.hpp>
+#include <input/InputQueue.h>
 
 namespace voxl
 {
@@ -68,5 +69,10 @@ namespace voxl
          * When true, the user is allowed to manually resize the window.
          */
         virtual void SetAllowManualResize(bool a_AllowResize) = 0;
+
+        /*
+         * Get all queued input received by the window since this was last called.
+         */
+        virtual utilities::InputData GetInputData() = 0;
     };
 }

@@ -1,10 +1,24 @@
 #pragma once
+#include "IRenderer.h"
 
 namespace voxl
 {
     class IServerConnection;
     class IChunkStore;
-    class IRenderer;
+    class VoxelRegistry;
+
+    struct ClientSettings
+    {
+        //Rendering related settings.
+        RenderSettings renderSettings;
+
+        std::uint32_t tps = 30;
+        std::uint32_t fps = 120;
+
+        //Server to connect to.
+        std::string ip = "127.0.0.1";
+        std::uint32_t port = 28280;
+    };
 
     class IClient
     {
@@ -27,8 +41,23 @@ namespace voxl
         virtual IServerConnection& GetConnection() = 0;
 
         /*
+         * Get the voxel registry.
+         */
+        virtual VoxelRegistry& GetVoxelRegistry() = 0;
+
+        /*
          * The clients entry point.
          */
-        virtual void Run() = 0;
+        virtual void Start() = 0;
+
+        /*
+         * Load client settings into the given object.
+         */
+        virtual void LoadSettings(ClientSettings& a_Settings) = 0;
+
+        /*
+         * Save the given client settings to file.
+         */
+        virtual void SaveSettings(const ClientSettings& a_Settings) = 0;
     };
 }

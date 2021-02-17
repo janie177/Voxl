@@ -8,6 +8,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include "file/FileUtilities.h"
+
 namespace utilities
 {
 	/*
@@ -79,6 +81,12 @@ namespace utilities
 	inline Logger::Logger(const std::string& fileName) : fileName(fileName), timeStamp(true), logToFile(true), logToConsole(true), flushCap(100)
 	{
 		logged.reserve(flushCap);
+
+		//Creat the log file if it doesn't exist yet.
+		if (!FileUtilities::FileExists(fileName))
+		{
+			FileUtilities::CreateFile(fileName);
+		}
 	}
 
 	inline Logger::~Logger()

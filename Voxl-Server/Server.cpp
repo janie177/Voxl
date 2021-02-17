@@ -18,6 +18,7 @@
 #include "DefaultGameMode.h"
 #include "DefaultWorldGenerator.h"
 #include "JsonUtilities.h"
+#include "time/GameLoop.h"
 #include "World.h"
 
 
@@ -26,7 +27,7 @@
 
 namespace voxl
 {
-    Server::Server() : m_Running(false)
+    Server::Server() : m_State(ServerState::SHUT_DOWN), m_RequestedState(ServerState::SHUT_DOWN), m_RequestedStateSaveState(true)
     {
         
     }
@@ -57,10 +58,14 @@ namespace voxl
         return *m_VoxelRegistry;
     }
 
-    bool Server::Start()
+    void Server::Start()
     {
-        if(!m_Running)
+        if(m_State == ServerState::SHUT_DOWN)
         {
+            //So that it keeps running.
+            m_State = ServerState::STARTING;
+            m_RequestedState = ServerState::RUNNING;
+
             //Create the logger.
             CreateLogger();
 
@@ -80,7 +85,7 @@ namespace voxl
                 if (!LoadSettingsFile())
                 {
                     m_Logger->log(utilities::Severity::Fatal, "Could not load or create server settings file!");
-                    return false;
+                    return;
                 }
                 else
                 {
@@ -99,7 +104,7 @@ namespace voxl
                 if(!LoadVoxelTypesFile())
                 {
                     m_Logger->log(utilities::Severity::Fatal, "Could not load or create voxel types file!");
-                    return false;
+                    return;
                 }
                 else
                 {
@@ -135,20 +140,56 @@ namespace voxl
             if (!m_ConnectionManager->Start(m_Settings))
             {
                 m_Logger->log(utilities::Severity::Fatal, "Could not set up connection server!");
-                return false;
+                return;
             }
             m_Logger->log(utilities::Severity::Info, "Connection server has been successfully set up!");
             m_Logger->log(utilities::Severity::Info, "Listening for connections at ip '" + m_Settings.ip + ":" + std::to_string(m_Settings.port) + "'.");
 
             //Mark server as running.
-            m_Running = true;
+            m_State = ServerState::RUNNING;
             m_Logger->log(utilities::Severity::Info, "Server finished starting up in " + std::to_string(timer.measure(utilities::TimeUnit::MILLIS)) + " milliseconds.");
-            return true;
         }
         else
         {
             m_Logger->log(utilities::Severity::Warning, "Server start signal received, but server is already running.");
-            return false;
+            return;
+        }
+
+        /*
+         * Main game loop.
+         */
+        utilities::GameLoop gameLoop(1, m_Settings.tps, false);
+        long long tick = 0;
+
+        while (true)
+        {
+            const auto data = gameLoop.update();
+
+            //Tick
+            if (data.tick)
+            {
+                Tick(data.deltaTick);
+                ++tick;
+            }
+
+            //Remove this but for now it's nice to see TPS.
+            if (tick == 300)
+            {
+                m_Logger->log(utilities::Severity::Info, "Tps: " + std::to_string(data.tps) + ".");
+                tick = 0;
+            }
+
+            if (m_RequestedState != ServerState::RUNNING)
+            {
+                break;
+            }
+        }
+
+        //Shutdown requested.
+        if(m_RequestedState == ServerState::SHUT_DOWN)
+        {
+            DoShutDown(m_RequestedStateSaveState);
+            m_State = ServerState::SHUT_DOWN;
         }
     }
 
@@ -187,63 +228,17 @@ namespace voxl
         return worlds;
     }
 
-    bool Server::HasShutDown()
-    {
-        return !m_Running;
-    }
-
     void Server::ShutDown(bool a_SaveAll)
     {
-        if(m_Running)
+        if(m_State == ServerState::RUNNING)
         {
-            utilities::Timer timer;
-            m_Logger->log(utilities::Severity::Info, "Server stop signal received.");
-
-            //Disconnect all clients.
-            m_ConnectionManager->DisconnectClients();
-
-            //Stop the connections.
-            m_ConnectionManager->Stop();
-
-            //Shutdown all worlds.
-            for(auto& pair : m_Worlds)
-            {
-                if(a_SaveAll)
-                {
-                    pair.second->Save();
-                }
-                pair.second->Unload();
-            }
-
-            //Clear all things in memory
-            m_Worlds.clear();
-            m_GameModes.clear();
-            m_Generators.clear();
-            m_VoxelRegistry.reset();
-            m_Logger.reset();
-
-            //Mark server as shut down.
-            m_Running = false;
-            m_Logger->log(utilities::Severity::Info, "Server shut-down finished in " + std::to_string(timer.measure(utilities::TimeUnit::MILLIS)) + " milliseconds.");
-            m_Logger->saveToFile();
+            //Set state to shutdown.
+            m_RequestedState = ServerState::SHUT_DOWN;
+            m_RequestedStateSaveState = a_SaveAll;
         }
         else
         {
             assert(0 && "Can't stop a server that isn't running.");
-        }
-    }
-
-    void Server::Restart(bool a_SaveAll)
-    {
-        if(m_Running)
-        {
-            m_Logger->log(utilities::Severity::Info, "Server restarting.");
-            ShutDown(a_SaveAll);
-            Start();
-        }
-        else
-        {
-            assert(0 && "Can't restart a server that isn't running.");
         }
     }
 
@@ -398,6 +393,39 @@ namespace voxl
         utilities::ServiceLocator<utilities::Logger>::setService(m_Logger.get());
     }
 
+    void Server::DoShutDown(bool a_SaveAll)
+    {
+        utilities::Timer timer;
+        m_Logger->log(utilities::Severity::Info, "Server stop signal received.");
+
+        //Disconnect all clients.
+        m_ConnectionManager->DisconnectClients();
+
+        //Stop the connections.
+        m_ConnectionManager->Stop();
+
+        //Shutdown all worlds.
+        for (auto& pair : m_Worlds)
+        {
+            if (a_SaveAll)
+            {
+                pair.second->Save();
+            }
+            pair.second->Unload();
+        }
+
+        //Clear all things in memory
+        m_Worlds.clear();
+        m_GameModes.clear();
+        m_Generators.clear();
+        m_VoxelRegistry.reset();
+
+        //Mark server as shut down.
+        m_Logger->log(utilities::Severity::Info, "Server shut-down finished in " + std::to_string(timer.measure(utilities::TimeUnit::MILLIS)) + " milliseconds.");
+        m_Logger->saveToFile();
+        m_Logger.reset();
+    }
+
     bool Server::LoadSettingsFile()
     {
         if(!utilities::FileUtilities::FileExists(SERVER_SETTINGS_FILE_NAME))
@@ -541,6 +569,11 @@ namespace voxl
     bool Server::WorldExists(const std::string& a_Name)
     {
         return utilities::FileUtilities::FileExists(m_Settings.worldsDirectory + "/" + a_Name) || GetWorld(a_Name) != nullptr;
+    }
+
+    ServerState Server::GetState()
+    {
+        return m_State;
     }
 
     IConnectionManager& Server::GetConnectionManager()

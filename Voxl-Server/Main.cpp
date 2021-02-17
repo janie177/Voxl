@@ -1,39 +1,44 @@
 #include "time/GameLoop.h"
 #include "Server.h"
+#include <chrono>
 
 int main()
 {
     std::unique_ptr<voxl::Server> server = std::make_unique<voxl::Server>();
-    server->Start();
 
-    auto& settings = server->GetServerSettings();
+    //Start the server on another thread.
+    std::thread thread(&voxl::Server::Start, server.get());
 
-    utilities::GameLoop gameLoop(1, settings.tps, false);
-    long long tick = 0;
-
-    while(true)
+    //Wait till the server goes into start mode.
+    while (true)
     {
-        const auto data = gameLoop.update();
-
-        //Tick
-        if(data.tick)
+        if(server->GetState() != voxl::ServerState::SHUT_DOWN)
         {
-            server->Tick(data.deltaTick);
-            ++tick;
-        }
-
-        //Remove this but for now it's nice to see TPS.
-        if(tick == 300)
-        {
-            server->GetLogger().log(utilities::Severity::Info, "Tps: " + std::to_string(data.tps) + ".");
-            tick = 0;
-        }
-
-        if(server->HasShutDown())
-        {
+            thread.detach();
             break;
         }
     }
+
+    //As long as the server is running, listen for input.
+    std::string input;
+    while(server->GetState() != voxl::ServerState::SHUT_DOWN)
+    {
+        std::cin >> input;
+
+        if(!input.empty())
+        {
+            std::cout << "Command received: " << input << std::endl;
+        }
+
+        if(input == "stop")
+        {
+            server->ShutDown(true);
+        }
+
+        input.clear();
+    }
+
+    getchar();
 
     return 0;
 }

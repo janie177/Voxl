@@ -18,13 +18,11 @@ namespace voxl
         void Tick(double a_DeltaTime) override;
         void RegisterWorldGenerator(const std::string& a_Name, std::shared_ptr<IWorldGenerator>& a_Generator) override;
         VoxelRegistry& GetVoxelRegistry() override;
-        bool Start() override;
+        void Start() override;
         IWorld* GetWorld(const std::string& a_Name) override;
         IWorld* LoadWorld(const std::string& a_Name) override;
         std::vector<IWorld*> GetWorlds() override;
-        bool HasShutDown() override;
         void ShutDown(bool a_SaveAll) override;
-        void Restart(bool a_SaveAll) override;
         bool UnloadWorld(const std::string& a_Name, bool a_Save) override;
         void RegisterGameMode(const std::string& a_Name, std::unique_ptr<IGameMode>&& a_GameMode) override;
         IWorld* CreateWorld(const WorldSettings& a_Settings) override;
@@ -34,19 +32,24 @@ namespace voxl
         std::unique_ptr<IGameMode> CreateGameMode(const std::string& a_Name) override;
         const ServerSettings& GetServerSettings() const override;
         IConnectionManager& GetConnectionManager() override;
+        bool WorldExists(const std::string& a_Name) override;
+        ServerState GetState() override;
 
     private:
         void CreateLogger();
+        void DoShutDown(bool a_SaveAll);
 
     public:
         bool LoadSettingsFile() override;
         void CreateSettingsFile(const ServerSettings& a_Settings) override;
         bool LoadVoxelTypesFile() override;
         void CreateVoxelTypesFile() override;
-        bool WorldExists(const std::string& a_Name) override;
     private:
         ServerSettings m_Settings;
-        bool m_Running;
+        ServerState m_State;
+        ServerState m_RequestedState;
+        bool m_RequestedStateSaveState;
+
         std::unique_ptr<utilities::Logger> m_Logger;
 
         //Registries containing stuff.

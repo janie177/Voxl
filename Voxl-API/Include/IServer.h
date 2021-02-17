@@ -17,6 +17,13 @@ namespace voxl
     class IPacketManager;
     class IConnectionManager;
 
+    enum class ServerState
+    {
+        STARTING,
+        RUNNING,
+        SHUT_DOWN,
+    };
+
     struct ServerSettings
     {
         //The ticks per second at which the server processes information.
@@ -49,22 +56,17 @@ namespace voxl
         /*
          * Returns true when the server has shut down.
          */
-        virtual bool HasShutDown() = 0;
+        virtual ServerState GetState() = 0;
 
         /*
          * Initialize server systems. 
          */
-        virtual bool Start() = 0;
+        virtual void Start() = 0;
 
         /*
          * Stop the server.
          */
         virtual void ShutDown(bool a_SaveAll) = 0;
-
-        /*
-         * Restart the server.
-         */
-        virtual void Restart(bool a_SaveAll) = 0;
 
         /*
          * Update the server, ticking and updating all worlds and game-modes.

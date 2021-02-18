@@ -10,6 +10,10 @@ namespace voxl
     {
         AUTHENTICATE = 0,
 
+        AUTHENTICATION_RESPONSE,
+
+        CHAT_MESSAGE,
+
         //UNKNOWN packet is always the last one to determine the amount of packets.
         UNKNOWN,
     };
@@ -42,5 +46,28 @@ namespace voxl
         char name[255];         //Username
 
         //TODO encryption and keys for verification.
+    };
+
+    /*
+     * Sent from server to client to verify or deny authentication.
+     */
+    struct Packet_AuthenticationResponse : public PacketBase<PacketType::AUTHENTICATION_RESPONSE>
+    {
+        bool accepted;
+    };
+
+    /*
+     * A chat message sent by a player to the server or from the server to all players.
+     */
+    struct Packet_ChatMessage : public PacketBase<PacketType::CHAT_MESSAGE>
+    {
+        //Timestamp at which the message was sent.
+        std::uint64_t timeStamp;
+
+        //Name of the message sender.
+        char sender[255];
+
+        //The message.
+        char message[255];
     };
 }

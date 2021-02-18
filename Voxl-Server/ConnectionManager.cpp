@@ -4,13 +4,19 @@
 #include <IClientConnection.h>
 
 #include "ClientConnection.h"
+#include "other/ServiceLocator.h"
 #include "PacketManager.h"
 
 namespace voxl
 {
-    ConnectionManager::ConnectionManager() : m_Server(nullptr)
+    ConnectionManager::ConnectionManager(std::uint32_t a_TimeoutTime) : m_Server(nullptr), m_TimeoutTime(a_TimeoutTime)
     {
 
+    }
+
+    ConnectionManager::~ConnectionManager()
+    {
+        //Has to be here and empty for forward declaration.
     }
 
     bool ConnectionManager::Start(const ServerSettings& a_Settings)
@@ -106,6 +112,8 @@ namespace voxl
                             std::unique_ptr<ClientConnection> connection = std::make_unique<ClientConnection>(event.peer);
                             if(m_PacketManager->Resolve(PacketType::AUTHENTICATE, *packet, connection.get()))
                             {
+                                //Link the peer and the data object and then insert into the user set.
+                                event.peer->data = connection.get();
                                 m_Clients.insert(std::make_pair(connection->GetUsername(), std::move(connection)));
                             }
                             else
@@ -121,6 +129,7 @@ namespace voxl
                 //Peer disconnected. 
             case ENET_EVENT_TYPE_DISCONNECT:
                 {
+                utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Info, "Disconnect received '" + std::to_string(reinterpret_cast<std::uintptr_t>(event.peer->data)) + "'.");
                 if (event.peer->data != nullptr)
                 {
                     //If this connection had a user attached to it, remove it.
@@ -131,6 +140,7 @@ namespace voxl
                         auto found = m_Clients.find(username);
                         if (found != m_Clients.end())
                         {
+                            utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Info, "Client '" + found->second->GetUsername() + "' disconnected at ip: " + found->second->GetIp() + ".");
                             m_Clients.erase(found);
                         }
                     }
@@ -144,9 +154,19 @@ namespace voxl
             }
         }
 
+        //Current time.
+        const auto now = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+
         //Update client state stuff.
         for (auto& client : m_Clients)
         {
+            //This should be handled by ENet.
+            ////Timeout connections.
+            //if(now - client.second->GetLastResponse() > m_TimeoutTime)
+            //{
+            //    client.second->Disconnect();
+            //}
+
             //Clients that are marked for disconnect are removed.
             if (client.second->GetConnectionState() == ConnectionState::DISCONNECTED)
             {

@@ -19,8 +19,9 @@ namespace voxl
     public:
         /*
          * Try to connect to the given IP address.
+         * If connections succeeds, an authentication packet is sent.
          */
-        virtual void Connect(const std::string& a_Ip) = 0;
+        virtual bool Connect(const std::string& a_Ip, std::uint32_t a_Port, const Packet_Authenticate& a_Authentication) = 0;
 
         /*
          * Get the packet manager used to handle incoming packets.

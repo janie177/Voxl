@@ -5,6 +5,7 @@ namespace voxl
     enum class ConnectionState
     {
         CONNECTED,      //Connection is active.
-        DISCONNECTED   //No connection is happening.
+        CONNECTING,     //Attempting to connect.
+        DISCONNECTED    //No connection is happening.
     };
 }

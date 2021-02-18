@@ -1,6 +1,7 @@
 #include "time/GameLoop.h"
 #include "Server.h"
 #include <chrono>
+#include <IClientConnection.h>;
 
 int main()
 {
@@ -43,6 +44,17 @@ int main()
                     break;
                 }
             }
+        }
+
+        else if(input == "players")
+        {
+            std::cout << "Users: " << std::endl;
+            auto& manager = server->GetConnectionManager();
+            for(auto& user : manager.GetConnectedClients())
+            {
+                std::cout << " - " << user->GetUsername() << std::endl;
+            }
+
         }
 
         input.clear();

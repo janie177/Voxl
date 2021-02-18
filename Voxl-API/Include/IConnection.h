@@ -46,16 +46,16 @@ namespace voxl
         /*
         * Send a packet to the client.
         */
-        virtual void SendPacket(IPacket& a_Data, size_t a_Size) = 0;
+        virtual void SendPacket(const IPacket& a_Data, size_t a_Size) = 0;
 
         /*
          * Send a packet to the client with type awareness.
          */
         template<typename T>
-        void SendPacket(T& a_Data)
+        void SendTypedPacket(const T& a_Data)
         {
             static_assert(std::is_base_of_v<IPacket, T>, "Can only send templated packet with a class derived from Packet.");
-            SendPacket(&a_Data, sizeof(T));
+            SendPacket(a_Data, sizeof(T));
         }
     };
 }

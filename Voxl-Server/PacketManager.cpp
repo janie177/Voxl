@@ -3,6 +3,8 @@
 #include <cassert>
 
 #include "IPacketHandler.h"
+#include "logging/Logger.h"
+#include "other/ServiceLocator.h"
 #include "PacketType.h"
 
 namespace voxl
@@ -20,6 +22,8 @@ namespace voxl
         {
             return found->Resolve(a_Data, a_Sender);
         }
+
+        utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Warning, "Package of type: " + std::to_string(static_cast<int>(a_Type)) + " is not handled.");
         return false;
     }
 

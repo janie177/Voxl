@@ -39,7 +39,7 @@ namespace voxl
         return std::string(name);
     }
 
-    void ClientConnection::SendPacket(IPacket& a_Data, size_t a_Size)
+    void ClientConnection::SendPacket(const IPacket& a_Data, size_t a_Size)
     {
         //Send the packet if connected still.
         if(m_State == ConnectionState::CONNECTED)

@@ -10,10 +10,13 @@
 
 namespace voxl
 {
+    class ConnectionManager;
+
     class Server final : public IServer
     {
     public:
         Server();
+        ~Server();
 
         void Tick(double a_DeltaTime) override;
         void RegisterWorldGenerator(const std::string& a_Name, std::shared_ptr<IWorldGenerator>& a_Generator) override;
@@ -57,6 +60,6 @@ namespace voxl
         std::map<std::string, std::shared_ptr<IWorldGenerator>> m_Generators;
         std::map<std::string, std::unique_ptr<IGameMode>> m_GameModes;
         std::unique_ptr<VoxelRegistry> m_VoxelRegistry;
-        std::unique_ptr<IConnectionManager> m_ConnectionManager;
+        std::unique_ptr<ConnectionManager> m_ConnectionManager;
     };
 }

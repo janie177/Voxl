@@ -18,6 +18,9 @@ namespace voxl
         //Server to connect to.
         std::string ip = "127.0.0.1";
         std::uint32_t port = 28280;
+
+        //User settings
+        std::string userName = "Kevin";
     };
 
     class IClient

@@ -12,24 +12,35 @@
 #include <VoxelInfo.h>
 #include <other/ServiceLocator.h>
 #include <IConnectionManager.h>
+#include <IPacketManager.h>
 
 
 #include "ConnectionManager.h"
 #include "DefaultGameMode.h"
 #include "DefaultWorldGenerator.h"
 #include "JsonUtilities.h"
+#include "PacketHandler_Authenticate.h"
+#include "PacketHandler_ChatMessage.h"
 #include "time/GameLoop.h"
 #include "World.h"
+#include "ConnectionManager.h"
 
 
 #define VOXEL_TYPES_FILE_NAME "voxeltypes.json"
 #define SERVER_SETTINGS_FILE_NAME "serverdata.json"
+
+#undef DeleteFile
 
 namespace voxl
 {
     Server::Server() : m_State(ServerState::SHUT_DOWN), m_RequestedState(ServerState::SHUT_DOWN), m_RequestedStateSaveState(true)
     {
         
+    }
+
+    Server::~Server()
+    {
+        //Required for unique ptr forward declare.
     }
 
     void Server::Tick(double a_DeltaTime)
@@ -136,7 +147,7 @@ namespace voxl
             }
 
             //Setup the connection server
-            m_ConnectionManager = std::make_unique<ConnectionManager>();
+            m_ConnectionManager = std::make_unique<ConnectionManager>(10000);   //10 seconds timeout time.
             if (!m_ConnectionManager->Start(m_Settings))
             {
                 m_Logger->log(utilities::Severity::Fatal, "Could not set up connection server!");
@@ -154,6 +165,13 @@ namespace voxl
             m_Logger->log(utilities::Severity::Warning, "Server start signal received, but server is already running.");
             return;
         }
+
+        /*
+         * Register packet handlers
+         */
+        auto& packetManager = m_ConnectionManager->GetPacketManager();
+        packetManager.Register(PacketType::AUTHENTICATE, std::make_unique<PacketHandler_Authenticate>(*m_ConnectionManager));
+        packetManager.Register(PacketType::CHAT_MESSAGE, std::make_unique<PacketHandler_ChatMessage>(*m_ConnectionManager));
 
         /*
          * Main game loop.

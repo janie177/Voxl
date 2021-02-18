@@ -5,7 +5,7 @@ namespace voxl
 {
     class StaticMesh : public IStaticMesh
     {
-        ~StaticMesh() override;
+
     };
 }
 

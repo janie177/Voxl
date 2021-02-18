@@ -15,7 +15,7 @@ namespace voxl
         std::uint64_t GetLastResponse() override;
         std::uint64_t GetConnectionStartTime() override;
         std::string GetIp() override;
-        void SendPacket(IPacket& a_Data, size_t a_Size) override;
+        void SendPacket(const IPacket& a_Data, size_t a_Size) override;
         std::string GetUsername() const override;
 
     public:

@@ -10,69 +10,86 @@ namespace voxl
      */
     struct WindowSettings
     {
+        std::string name = "Window";
         glm::ivec2 dimensions = { 400, 600 };
         bool fullScreen = false;
         bool hideCursor = false;
-        bool lockCursor = false;
+        bool captureCursor = false;
         bool allowManualResize = true;
     };
 
-    /*
-     * Window interface with basic interactions.
-     */
+    struct WindowSettings;
+    class SwapChain;
+    class RenderTarget;
+
     class IWindow
     {
     public:
         virtual ~IWindow() = default;
 
         /*
-         * Initialize the window.
+         * Set a callback that is called when the window resizes.
+         *
+         * Example format: SetResizeCallback([](int w, int h){ //CODE });
          */
-        virtual void Init(const WindowSettings& a_Settings) = 0;
+        virtual void SetResizeCallback(std::function<void(int a_Width, int a_Height)> a_Function) = 0;
 
         /*
-         * Set the window settings.
+         * Close the window.
          */
-        virtual void SetSettings(const WindowSettings& a_Settings) = 0;
+        virtual void Close() = 0;
 
         /*
-         * Set the callback that is invoked when the windows dimensions change due to user input.
+         * Resize this window to the specified dimensions.
          */
-        virtual void SetResizeCallback(std::function<void(int a_X, int a_Y, bool a_FullScreen)>& a_Function) = 0;
+        virtual void Resize(glm::vec2 a_Dimensions) = 0;
 
         /*
-         * Get the dimensions of the window.
+         * Get the current dimensions of this window.
          */
-        virtual glm::ivec2 GetDimensions() = 0;
+        virtual glm::vec2 GetDimensions() = 0;
 
         /*
-         * Resize the window to new dimensions.
+         * Returns whether this window is currently full screen mode.
          */
-        virtual void Resize(const glm::ivec2& a_Dimensions) = 0;
+        virtual bool IsFullScreen() = 0;
 
         /*
-         * When true, the window will be made full-screen resolution.
+         * Toggle fullscreen state on or off.
          */
         virtual void SetFullScreen(bool a_FullScreen) = 0;
 
         /*
-         * When true, the cursor will be hidden.
+         * Set the mouse position for this window.
+         * This caps to be within 0,0 and width,height.
+         *
+         * This regards the native OS mouse.
          */
-        virtual void SetHideCursor(bool a_HideCursor) = 0;
+        virtual void SetNativeMousePosition(const glm::vec2& a_MousePosition) = 0;
 
         /*
-         * When true, the cursor will be locked to the center of the window.
+         * Get the mouse position of the native OS mouse.
          */
-        virtual void SetLockCursor(bool a_CaptureCursor) = 0;
+        virtual glm::vec2 GetNativeMousePosition() const = 0;
 
         /*
-         * When true, the user is allowed to manually resize the window.
+         * Get a queue of all input events that happened since this was last called.
          */
-        virtual void SetAllowManualResize(bool a_AllowResize) = 0;
+        virtual utilities::InputData PollInput() = 0;
 
         /*
-         * Get all queued input received by the window since this was last called.
+         * Returns whether this window has closed or not.
          */
-        virtual utilities::InputData GetInputData() = 0;
+        virtual bool IsClosed() const = 0;
+
+        /*
+         * Initialize the window with the given settings.
+         */
+        virtual bool Initialize(const WindowSettings& a_Settings) = 0;
+
+        /*
+         * Called when the window resizes.
+         */
+        virtual void OnResize(const glm::ivec2& a_NewSize) = 0;
     };
 }

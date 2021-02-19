@@ -41,6 +41,12 @@ namespace voxl
         m_ChunkStore = std::make_unique<ClientChunkStore>();
         m_Renderer = std::make_unique<Renderer>();
 
+        if(!m_Renderer->Init(m_Settings.renderSettings))
+        {
+            std::cout << "Could not initialize rendering system." << std::endl;
+            return;
+        }
+
         //Initialize the connection and connect to the server.
         Packet_Authenticate authentication;
         strcpy_s(authentication.name, m_Settings.userName.length() + 1, m_Settings.userName.c_str());
@@ -89,34 +95,45 @@ namespace voxl
 
         //Start a game loop with the settings FPS and TPS.
         utilities::GameLoop loop{ 144, 30 };
-        utilities::InputQueue input;
 
+        //Get the window from the renderer.
+        auto window = m_Renderer->GetWindow();
+
+        //Count the ticks.
         long counter = 0;
 
-        m_Running = true;
-        while(m_Running)
+        /*
+         * Keep the game loop going for as long as the server is online and the window is open.
+         */
+        while(m_ServerConnection->GetConnectionState() == ConnectionState::CONNECTED && !window->IsClosed())
         {
-            auto data = loop.update();
+            const auto data = loop.update();
 
             if(data.tick)
             {
-                ////Retrieve input data.
-                ////TODO move to window class to listen for actual input.
-                //auto inputData = input.getQueuedEvents();
-                //utilities::MouseEvent mEvent;
-                //utilities::KeyboardEvent kEvent;
+                //Retrieve input data.
+                auto inputData = window->PollInput();
 
-                ////Process mouse input.
-                //while(inputData.getNextEvent(mEvent))
-                //{
-                //    
-                //}
+                utilities::MouseEvent mEvent;
+                utilities::KeyboardEvent kEvent;
 
-                ////Process keyboard input.
-                //while(inputData.getNextEvent(kEvent))
-                //{
-                //    
-                //}
+                //Process mouse input.
+                while(inputData.getNextEvent(mEvent))
+                {
+                    if(mEvent.action == utilities::MouseAction::CLICK)
+                    {
+                        std::cout << "CLICKED!" << std::endl;
+                    }
+                }
+
+                //Process keyboard input.
+                while(inputData.getNextEvent(kEvent))
+                {
+                    if(kEvent.action == utilities::KeyboardAction::KEY_PRESSED)
+                    {
+                        std::cout << char(kEvent.keyCode) << " PRESSED!" << std::endl;
+                    }
+                }
 
                 //Process incoming packets.
                 m_ServerConnection->ProcessPackets();
@@ -124,7 +141,7 @@ namespace voxl
                 ++counter;
 
                 //Send a test packet.
-                if(counter % 100 == 0)
+                if(counter % 200 == 0)
                 {
                     std::cout << "Sending chat package." << std::endl;
                     Packet_ChatMessage message;
@@ -147,6 +164,10 @@ namespace voxl
 
         //TODO deinitialize systems.
         m_ServerConnection->Shutdown();
+
+        std::cout << "Disconnected and client shut down." << std::endl;
+
+        getchar();
     }
 
     VoxelRegistry& Client::GetVoxelRegistry()

@@ -13,7 +13,7 @@ namespace voxl
     class ConnectionManager : public IConnectionManager
     {
     public:
-        ConnectionManager(std::uint32_t a_TimeoutTime);
+        ConnectionManager();
 
         ~ConnectionManager() override;
 
@@ -28,7 +28,6 @@ namespace voxl
         _ENetHost* m_Server;
         std::unordered_map<std::string, std::unique_ptr<IClientConnection>> m_Clients;
         std::unique_ptr<IPacketManager> m_PacketManager;
-        std::uint32_t m_TimeoutTime;
     };
 }
 

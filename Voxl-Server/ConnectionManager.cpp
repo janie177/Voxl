@@ -9,7 +9,7 @@
 
 namespace voxl
 {
-    ConnectionManager::ConnectionManager(std::uint32_t a_TimeoutTime) : m_Server(nullptr), m_TimeoutTime(a_TimeoutTime)
+    ConnectionManager::ConnectionManager() : m_Server(nullptr)
     {
 
     }
@@ -129,7 +129,6 @@ namespace voxl
                 //Peer disconnected. 
             case ENET_EVENT_TYPE_DISCONNECT:
                 {
-                utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Info, "Disconnect received '" + std::to_string(reinterpret_cast<std::uintptr_t>(event.peer->data)) + "'.");
                 if (event.peer->data != nullptr)
                 {
                     //If this connection had a user attached to it, remove it.
@@ -145,8 +144,8 @@ namespace voxl
                         }
                     }
                     event.peer->data = nullptr;
-                    enet_packet_destroy(event.packet);
                 }
+                enet_packet_destroy(event.packet);
                 }
                 break;
             default:
@@ -160,13 +159,6 @@ namespace voxl
         //Update client state stuff.
         for (auto& client : m_Clients)
         {
-            //This should be handled by ENet.
-            ////Timeout connections.
-            //if(now - client.second->GetLastResponse() > m_TimeoutTime)
-            //{
-            //    client.second->Disconnect();
-            //}
-
             //Clients that are marked for disconnect are removed.
             if (client.second->GetConnectionState() == ConnectionState::DISCONNECTED)
             {

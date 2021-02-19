@@ -42,7 +42,6 @@ namespace voxl
 
                 //Log the request
                 utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Info, "Authentication request from: " + a_Sender->GetIp() + " for user " + sender->GetUsername() + " denied.");
-
                 return false;
             }
             else

@@ -150,7 +150,7 @@ namespace voxl
 
     void ServerConnection::ProcessPackets()
     {
-        //Process events for each client.
+        //Process events from the server.
         ENetEvent event;
         while (enet_host_service(m_Client, &event, 0) > 0)
         {

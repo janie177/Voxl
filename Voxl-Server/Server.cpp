@@ -147,7 +147,7 @@ namespace voxl
             }
 
             //Setup the connection server
-            m_ConnectionManager = std::make_unique<ConnectionManager>(10000);   //10 seconds timeout time.
+            m_ConnectionManager = std::make_unique<ConnectionManager>();
             if (!m_ConnectionManager->Start(m_Settings))
             {
                 m_Logger->log(utilities::Severity::Fatal, "Could not set up connection server!");

@@ -73,13 +73,15 @@ namespace voxl
 
         /*
          * Initialize the rendering system.
+         * Returns true if setup was successful.
          */
-        virtual void Init(const RenderSettings& a_Settings) = 0;
+        virtual bool Init(const RenderSettings& a_Settings) = 0;
 
         /*
-         * Resize the rendering resolution to the given window.
+         * Resize the swap chains rendering resolution.
+         * This should be called automatically when the window associated with it is resized.
          */
-        virtual void Resize(IWindow* a_Window) = 0;
+        virtual void ResizeSwapChain(const glm::ivec2& a_NewSize) = 0;
 
         /*
          * Get the window used by the renderer.

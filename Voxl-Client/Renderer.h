@@ -22,7 +22,7 @@ namespace voxl
         void FrameData(const SkeletalMeshDrawData& a_Data) override;
         void DrawFrame() override;
         void ResizeSwapChain(const glm::ivec2& a_NewSize) override;
-
+        void ShutDown() override;
     private:
         bool m_Initialized;
         std::shared_ptr<Window_Win32> m_Window;

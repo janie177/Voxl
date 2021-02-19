@@ -43,7 +43,6 @@ namespace voxl
     public:
         void SetResizeCallback(std::function<void(int a_Width, int a_Height)> a_Function) override;
         bool Initialize(const WindowSettings& a_Settings) override;
-        void OnResize(const glm::ivec2& a_NewSize) override;
     private:
         //Window settings
         WindowSettings m_Settings;
@@ -62,6 +61,9 @@ namespace voxl
 
         //True if the window has closed
         bool m_Closed;
+
+        //Whether or not the screen is currently full-screen.
+        bool m_IsFullScreen;
 
         //Window handle
         HWND m_Hwnd;

@@ -86,10 +86,5 @@ namespace voxl
          * Initialize the window with the given settings.
          */
         virtual bool Initialize(const WindowSettings& a_Settings) = 0;
-
-        /*
-         * Called when the window resizes.
-         */
-        virtual void OnResize(const glm::ivec2& a_NewSize) = 0;
     };
 }

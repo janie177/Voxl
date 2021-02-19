@@ -78,6 +78,11 @@ namespace voxl
         virtual bool Init(const RenderSettings& a_Settings) = 0;
 
         /*
+         * Shut down the rendering system.
+         */
+        virtual void ShutDown() = 0;
+
+        /*
          * Resize the swap chains rendering resolution.
          * This should be called automatically when the window associated with it is resized.
          */

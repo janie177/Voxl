@@ -6,7 +6,7 @@ namespace voxl
 {
     LONG Window_Win32::m_WindowStyle = WS_OVERLAPPEDWINDOW | WS_BORDER;
 
-    Window_Win32::Window_Win32(IRenderer& a_Renderer) : m_Dimensions(0, 0), m_MousePos(0, 0), m_Closed(false), m_Hwnd(nullptr), m_HasFocus(false), m_CursorHidden(false), m_Renderer(a_Renderer)
+    Window_Win32::Window_Win32(IRenderer& a_Renderer) : m_Dimensions(0, 0), m_MousePos(0, 0), m_Closed(false), m_Hwnd(nullptr), m_HasFocus(false), m_CursorHidden(false), m_Renderer(a_Renderer), m_IsFullScreen(false)
     {
 
     }
@@ -242,12 +242,12 @@ namespace voxl
 
     void Window_Win32::SetFullScreen(bool a_FullScreen)
     {
-        if (m_Settings.fullScreen != a_FullScreen)
+        if (m_IsFullScreen != a_FullScreen)
         {
-            m_Settings.fullScreen = a_FullScreen;
+            m_IsFullScreen = a_FullScreen;
 
             //To windowed mode.
-            if (!m_Settings.fullScreen)
+            if (!m_IsFullScreen)
             {
                 //Set the Window back to normal mode with the stored sizes.
                 SetWindowLong(m_Hwnd, GWL_STYLE, m_WindowStyle);
@@ -401,8 +401,14 @@ namespace voxl
             const glm::vec2 newDims = { width, height };
             m_Dimensions = newDims;
 
+            //Notify the rendering system.
+            m_Renderer.ResizeSwapChain(newDims);
+
             //Notify the callback.
-            m_ResizeCallback(static_cast<int>(m_Dimensions.x), static_cast<int>(m_Dimensions.y));
+            if(m_ResizeCallback != nullptr)
+            {
+                m_ResizeCallback(static_cast<int>(m_Dimensions.x), static_cast<int>(m_Dimensions.y));
+            }
         }
 
         //Clip the cursor to the window if focus is still active.
@@ -495,10 +501,5 @@ namespace voxl
         ObtainFocus();
 
         return true;
-    }
-
-    void Window_Win32::OnResize(const glm::ivec2& a_NewSize)
-    {
-        m_Renderer.ResizeSwapChain(a_NewSize);
     }
 }

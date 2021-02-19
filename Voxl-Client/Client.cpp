@@ -1,15 +1,22 @@
 #include "Client.h"
 
 #include <iostream>
+#include <nlohmann/json.hpp>
 #include <time/GameLoop.h>
 #include <VoxelRegistry.h>
+
+#include <fstream>
 
 #include "ClientChunkStore.h"
 #include "input/InputQueue.h"
 #include "Renderer.h"
 #include "ServerConnection.h"
 #include "ClientPacketManager.h"
+#include "file/FileUtilities.h"
 #include "PacketHandler_IncomingMessage.h"
+#include "JsonUtilities.h"
+
+#define CLIENT_SETTINGS_FILE "client.json"
 
 namespace voxl
 {
@@ -35,7 +42,11 @@ namespace voxl
     void Client::Start()
     {
         //Load the settings.
-        LoadSettings(m_Settings);
+        if(!LoadSettings(m_Settings))
+        {
+            std::cout << "Could not load client settings. Creating new defaults and saving to file." << std::endl;
+            SaveSettings(m_Settings);
+        }
 
         //Initialize systems.
         m_ChunkStore = std::make_unique<ClientChunkStore>();
@@ -55,12 +66,14 @@ namespace voxl
         if(!m_ServerConnection->Setup())
         {
             std::cout << "Could not set up client connection." << std::endl;
+            ShutDown();
             return;
         }
 
         if(!m_ServerConnection->Connect(m_Settings.ip, m_Settings.port, authentication))
         {
             std::cout << "Could not connect to remote server at " << m_Settings.ip << ":" << std::to_string(m_Settings.port) << std::endl;
+            ShutDown();
             return;
         }
 
@@ -73,7 +86,6 @@ namespace voxl
                 if(state == ConnectionState::DISCONNECTED)
                 {
                     std::cout << "Could not connect to server." << std::endl;
-                    return;
                 }
                 else
                 {
@@ -162,12 +174,22 @@ namespace voxl
             }
         }
 
-        //TODO deinitialize systems.
-        m_ServerConnection->Shutdown();
+        ShutDown();
+    }
+
+    void Client::ShutDown()
+    {
+        //Save settings if they changed.
+        if (!SaveSettings(m_Settings))
+        {
+            std::cout << "Could not save client settings." << std::endl;
+        }
+
+        //Shutdown systems.
+        if(m_ServerConnection != nullptr) m_ServerConnection->Shutdown();
+        if(m_Renderer != nullptr) m_Renderer->ShutDown();
 
         std::cout << "Disconnected and client shut down." << std::endl;
-
-        getchar();
     }
 
     VoxelRegistry& Client::GetVoxelRegistry()
@@ -176,13 +198,56 @@ namespace voxl
         return *m_VoxelRegistry;
     }
 
-    void Client::LoadSettings(ClientSettings& a_Settings)
+    bool Client::LoadSettings(ClientSettings& a_Settings)
     {
+        if (!utilities::FileUtilities::FileExists(CLIENT_SETTINGS_FILE))
+        {
+            return false;
+        }
 
+        std::ifstream inStream(CLIENT_SETTINGS_FILE);
+        nlohmann::json file = nlohmann::json::parse(inStream);
+
+        //Default settings object.
+        ClientSettings def;
+
+        //Basic client settings.
+        JsonUtilities::VerifyValue("name", file, def.userName);
+        JsonUtilities::VerifyValue("fps", file, def.fps);
+        JsonUtilities::VerifyValue("serverIP", file, def.ip);
+        JsonUtilities::VerifyValue("serverPort", file, def.port);
+
+        //Graphics related.
+        JsonUtilities::VerifyValue("verticalSync", file, def.renderSettings.vSync);
+        JsonUtilities::VerifyValue("resolutionX", file, def.renderSettings.windowSettings.dimensions.x);
+        JsonUtilities::VerifyValue("resolutionY", file, def.renderSettings.windowSettings.dimensions.y);
+        JsonUtilities::VerifyValue("fullScreen", file, def.renderSettings.windowSettings.fullScreen);
+
+        //Overwrite with the loaded and default settings.
+        a_Settings = def;
+        return true;
     }
 
-    void Client::SaveSettings(const ClientSettings& a_Settings)
+    bool Client::SaveSettings(const ClientSettings& a_Settings)
     {
+        nlohmann::json file;
+        auto voxelTypes = nlohmann::json::array();
 
+        //General info and connection.
+        file["name"] = a_Settings.userName;
+        file["fps"] = a_Settings.fps;
+        file["serverIP"] = a_Settings.ip;
+        file["serverPort"] = a_Settings.port;
+
+        //Graphics and window.
+        file["verticalSync"] = a_Settings.renderSettings.vSync;
+        file["resolutionX"] = a_Settings.renderSettings.windowSettings.dimensions.x;
+        file["resolutionY"] = a_Settings.renderSettings.windowSettings.dimensions.y;
+        file["fullScreen"] = a_Settings.renderSettings.windowSettings.fullScreen;
+
+        //Write to file.
+        std::ofstream stream(CLIENT_SETTINGS_FILE);
+        stream << file;
+        return true;
     }
 }

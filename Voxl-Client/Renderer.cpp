@@ -90,7 +90,15 @@ namespace voxl
 
     void Renderer::ResizeSwapChain(const glm::ivec2& a_NewSize)
     {
-        assert(m_Initialized);
+        //Only do this if initialized. This can be called by the window before the renderer is done setting up so ignore otherwise.
+        if(m_Initialized)
+        {
+            //TODO   
+        }
+    }
+
+    void Renderer::ShutDown()
+    {
         //TODO
     }
 }

@@ -83,5 +83,8 @@
     <ClInclude Include="PacketHandler_IncomingMessage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="JsonUtilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

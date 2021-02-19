@@ -17,8 +17,9 @@ namespace voxl
         VoxelRegistry& GetVoxelRegistry() override;
 
         void Start() override;
-        void LoadSettings(ClientSettings& a_Settings) override;
-        void SaveSettings(const ClientSettings& a_Settings) override;
+        void ShutDown();
+        bool LoadSettings(ClientSettings& a_Settings) override;
+        bool SaveSettings(const ClientSettings& a_Settings) override;
     private:
         bool m_Running;
         std::unique_ptr<IChunkStore> m_ChunkStore;

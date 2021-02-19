@@ -56,11 +56,11 @@ namespace voxl
         /*
          * Load client settings into the given object.
          */
-        virtual void LoadSettings(ClientSettings& a_Settings) = 0;
+        virtual bool LoadSettings(ClientSettings& a_Settings) = 0;
 
         /*
          * Save the given client settings to file.
          */
-        virtual void SaveSettings(const ClientSettings& a_Settings) = 0;
+        virtual bool SaveSettings(const ClientSettings& a_Settings) = 0;
     };
 }

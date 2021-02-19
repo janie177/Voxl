@@ -522,6 +522,7 @@ namespace voxl
 
         std::ifstream inStream(VOXEL_TYPES_FILE_NAME);
         nlohmann::json file = nlohmann::json::parse(inStream);
+
         nlohmann::basic_json<> voxelTypes;
         if(!JsonUtilities::VerifyValue("voxelTypes", file, voxelTypes))
         {

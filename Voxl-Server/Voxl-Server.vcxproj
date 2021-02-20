@@ -104,6 +104,7 @@
     <ClInclude Include="JsonUtilities.h" />
     <ClInclude Include="PacketHandler_Authenticate.h" />
     <ClInclude Include="PacketHandler_ChatMessage.h" />
+    <ClInclude Include="PacketHandler_Request.h" />
     <ClInclude Include="PacketManager.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="VoxelEditor.h" />

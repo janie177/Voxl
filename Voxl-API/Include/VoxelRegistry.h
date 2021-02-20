@@ -45,7 +45,7 @@ namespace voxl
                 return false;
             }
 
-            m_VoxelTypes.emplace_back(a_Information);
+            m_VoxelTypes[a_Information.id] = (a_Information);
             return true;
         }
 

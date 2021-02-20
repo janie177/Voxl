@@ -15,6 +15,7 @@
 #include "file/FileUtilities.h"
 #include "PacketHandler_IncomingMessage.h"
 #include "JsonUtilities.h"
+#include "PacketHandler_VoxelInfo.h"
 
 #define CLIENT_SETTINGS_FILE "client.json"
 
@@ -42,7 +43,7 @@ namespace voxl
     void Client::Start()
     {
         //Load the settings.
-        if(!LoadSettings(m_Settings))
+        if (!LoadSettings(m_Settings))
         {
             std::cout << "Could not load client settings. Creating new defaults and saving to file." << std::endl;
             SaveSettings(m_Settings);
@@ -52,7 +53,7 @@ namespace voxl
         m_ChunkStore = std::make_unique<ClientChunkStore>();
         m_Renderer = std::make_unique<Renderer>();
 
-        if(!m_Renderer->Init(m_Settings.renderSettings))
+        if (!m_Renderer->Init(m_Settings.renderSettings))
         {
             std::cout << "Could not initialize rendering system." << std::endl;
             return;
@@ -63,14 +64,14 @@ namespace voxl
         strcpy_s(authentication.name, m_Settings.userName.length() + 1, m_Settings.userName.c_str());
         m_ServerConnection = std::make_unique<ServerConnection>(5000);
 
-        if(!m_ServerConnection->Setup())
+        if (!m_ServerConnection->Setup())
         {
             std::cout << "Could not set up client connection." << std::endl;
             ShutDown();
             return;
         }
 
-        if(!m_ServerConnection->Connect(m_Settings.ip, m_Settings.port, authentication))
+        if (!m_ServerConnection->Connect(m_Settings.ip, m_Settings.port, authentication))
         {
             std::cout << "Could not connect to remote server at " << m_Settings.ip << ":" << std::to_string(m_Settings.port) << std::endl;
             ShutDown();
@@ -78,12 +79,12 @@ namespace voxl
         }
 
         //Wait for connection to either succeed or fail.
-        while(true)
+        while (true)
         {
             auto state = m_ServerConnection->GetConnectionState();
-            if(state != ConnectionState::CONNECTING)
+            if (state != ConnectionState::CONNECTING)
             {
-                if(state == ConnectionState::DISCONNECTED)
+                if (state == ConnectionState::DISCONNECTED)
                 {
                     std::cout << "Could not connect to server." << std::endl;
                 }
@@ -91,7 +92,7 @@ namespace voxl
                 {
                     std::cout << "Connected to server." << std::endl;
                 }
-                
+
                 break;
             }
         }
@@ -99,11 +100,29 @@ namespace voxl
         //Register the classes to handle certain packets.
         m_ServerConnection->GetPacketManager().Register(PacketType::CHAT_MESSAGE, std::make_unique<PacketHandler_IncomingMessage>());
 
-        //TODO
-        //Retrieve the voxel registry from the server and load it client-sided.
-        //m_VoxelRegistry = std::make_unique<VoxelRegistry>();
+        //Register the voxel info packet which should be sent soon.
+        auto voxelInfoHandler = std::make_unique<PacketHandler_VoxelInfo>(m_VoxelRegistry);
 
+        //Request the voxel data packet.
+        Packet_Request request;
+        request.requested = PacketType::VOXEL_INFO;
+        m_ServerConnection->SendTypedPacket(request);
 
+        //Wait for for voxel data packet to arrive and then process it.
+        std::cout << "Attempting to retrieve voxel info..." << std::endl;
+        if (m_ServerConnection->WaitForPacket(PacketType::VOXEL_INFO, 6000, [&](IPacket* a_Packet)
+        {
+            voxelInfoHandler->Resolve(*a_Packet, m_ServerConnection.get());
+        }))
+        {
+            std::cout << "Voxel info retrieved and parsed successfully!" << std::endl;
+        }
+        else
+        {
+            std::cout << "Could not retrieve and parse voxel info." << std::endl;
+            ShutDown();
+            return;
+        }
 
         //Start a game loop with the settings FPS and TPS.
         utilities::GameLoop loop{ 144, 30 };

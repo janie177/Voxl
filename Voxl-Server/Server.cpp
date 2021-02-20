@@ -24,6 +24,7 @@
 #include "time/GameLoop.h"
 #include "World.h"
 #include "ConnectionManager.h"
+#include "PacketHandler_Request.h"
 
 
 #define VOXEL_TYPES_FILE_NAME "voxeltypes.json"
@@ -111,16 +112,25 @@ namespace voxl
             }
             else
             {
-                CreateVoxelTypesFile();
-                if(!LoadVoxelTypesFile())
+                if (!utilities::FileUtilities::FileExists(VOXEL_TYPES_FILE_NAME))
                 {
-                    m_Logger->log(utilities::Severity::Fatal, "Could not load or create voxel types file!");
-                    return;
+                    CreateVoxelTypesFile();
+                    if (!LoadVoxelTypesFile())
+                    {
+                        m_Logger->log(utilities::Severity::Fatal, "Could not load or create voxel types file!");
+                        return;
+                    }
+                    else
+                    {
+                        m_Logger->log(utilities::Severity::Info, "Default voxel types file created and loaded successfully.");
+                    }
                 }
                 else
                 {
-                    m_Logger->log(utilities::Severity::Info, "Default voxel types file created and loaded successfully.");
+                    std::cout << "Voxel type file corrupted. Delete or repair it before starting the server." << std::endl;
+                    return;
                 }
+
             }
 
             //Register the default world generator and default gamemode.
@@ -170,8 +180,9 @@ namespace voxl
          * Register packet handlers
          */
         auto& packetManager = m_ConnectionManager->GetPacketManager();
-        packetManager.Register(PacketType::AUTHENTICATE, std::make_unique<PacketHandler_Authenticate>(*m_ConnectionManager));
-        packetManager.Register(PacketType::CHAT_MESSAGE, std::make_unique<PacketHandler_ChatMessage>(*m_ConnectionManager));
+        packetManager.Register(PacketType::AUTHENTICATE, std::make_unique<PacketHandler_Authenticate>(*m_ConnectionManager));   //Authenticates a user.
+        packetManager.Register(PacketType::CHAT_MESSAGE, std::make_unique<PacketHandler_ChatMessage>(*m_ConnectionManager));    //Distributes chat messages    
+        packetManager.Register(PacketType::REQUEST, std::make_unique<PacketHandler_Request>(m_VoxelInfoFile));                  //Handles any sort of request.
 
         /*
          * Main game loop.
@@ -521,11 +532,12 @@ namespace voxl
         }
 
         std::ifstream inStream(VOXEL_TYPES_FILE_NAME);
-        nlohmann::json file = nlohmann::json::parse(inStream);
+        nlohmann::json file = nlohmann::json::parse(inStream, nullptr, false, false);
 
         nlohmann::basic_json<> voxelTypes;
-        if(!JsonUtilities::VerifyValue("voxelTypes", file, voxelTypes))
+        if(file.is_discarded() || !JsonUtilities::VerifyValue("voxelTypes", file, voxelTypes))
         {
+            std::cout << "Could not load existing voxel types file. Invalid Json format." << std::endl;
             return false;
         }
 
@@ -540,6 +552,7 @@ namespace voxl
 
             //Load every element. When an element is not found it simply remains the default.
             JsonUtilities::VerifyValue("name", value, info.name);
+            JsonUtilities::VerifyValue("description", value, info.description);
             JsonUtilities::VerifyValue("id", value, info.id);
             JsonUtilities::VerifyValue("collision", value, info.collision);
             JsonUtilities::VerifyValue("emissiveLight", value, info.emissiveLight);
@@ -555,6 +568,12 @@ namespace voxl
             m_VoxelRegistry->Register(info);
         }
 
+        /*
+         * Store the voxel data file for distribution to clients.
+         */
+        std::string str = file.dump();
+        m_VoxelInfoFile.insert(m_VoxelInfoFile.end(), str.begin(), str.end());
+
         return true;
     }
 
@@ -566,6 +585,7 @@ namespace voxl
         auto voxelTypes = nlohmann::json::array();
 
         element["name"] = info.name;
+        element["description"] = info.description;
         element["id"] = info.id;
         element["collision"] = info.collision;
         element["emissiveLight"] = info.emissiveLight;

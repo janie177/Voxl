@@ -106,6 +106,7 @@
     <ClInclude Include="ClientPacketManager.h" />
     <ClInclude Include="JsonUtilities.h" />
     <ClInclude Include="PacketHandler_IncomingMessage.h" />
+    <ClInclude Include="PacketHandler_VoxelInfo.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ServerConnection.h" />
     <ClInclude Include="SkeletalMesh.h" />

@@ -4,6 +4,7 @@
 #include <chrono>
 
 #include "ClientPacketManager.h"
+#include "time/Timer.h"
 
 namespace voxl
 {
@@ -157,7 +158,8 @@ namespace voxl
             //Only allow events from the server.
             if(event.peer != m_Server)
             {
-                return;
+                enet_packet_destroy(event.packet);
+                continue;
             }
 
             switch (event.type)
@@ -187,5 +189,64 @@ namespace voxl
                 break;
             }
         }
+    }
+
+    bool ServerConnection::WaitForPacket(PacketType a_Type, std::uint32_t a_TimeOutMillis,
+        std::function<void(IPacket* a_Packet)> a_OnReceive)
+    {
+        //Process events from the server.
+        ENetEvent event;
+        utilities::Timer timer;
+        while (enet_host_service(m_Client, &event, a_TimeOutMillis) > 0)
+        {
+            //Only allow events from the server.
+            if (event.peer != m_Server)
+            {
+                enet_packet_destroy(event.packet);
+                continue;
+            }
+
+            switch (event.type)
+            {
+                //Servers don't connect to players?
+            case ENET_EVENT_TYPE_CONNECT:
+            {
+                enet_packet_destroy(event.packet);
+            }
+            break;
+            case ENET_EVENT_TYPE_RECEIVE:
+            {
+                IPacket* packet = reinterpret_cast<IPacket*>(event.packet->data);
+
+                //Packet of the right type received, run the executable and then free the memory.
+                if (packet->type == a_Type)
+                {
+                    a_OnReceive(packet);
+                    enet_packet_destroy(event.packet);
+                    return true;
+                }
+                enet_packet_destroy(event.packet);
+            }
+            break;
+            //Server has disconnected so I guess this is it :(
+            case ENET_EVENT_TYPE_DISCONNECT:
+            {
+                Disconnect();
+                enet_packet_destroy(event.packet);
+            }
+            break;
+            default:
+                break;
+            }
+
+            //Time has passed so timeout.
+            if (timer.measure(utilities::TimeUnit::MILLIS) >= a_TimeOutMillis)
+            {
+                return false;
+            }
+        }
+
+        //No packets received, timeout.
+        return false;
     }
 }

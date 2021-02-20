@@ -2,6 +2,7 @@
 #include <map>
 #include <IServer.h>
 
+
 #include "VoxelRegistry.h"
 #include "IWorld.h"
 #include "IGameMode.h"
@@ -61,5 +62,9 @@ namespace voxl
         std::map<std::string, std::unique_ptr<IGameMode>> m_GameModes;
         std::unique_ptr<VoxelRegistry> m_VoxelRegistry;
         std::unique_ptr<ConnectionManager> m_ConnectionManager;
+
+        //The voxel info file loaded from disk as chars.
+        //This is in JSon format.
+        std::vector<char> m_VoxelInfoFile;
     };
 }

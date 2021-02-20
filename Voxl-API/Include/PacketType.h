@@ -10,7 +10,11 @@ namespace voxl
     {
         AUTHENTICATE = 0,
 
+        REQUEST,
+
         AUTHENTICATION_RESPONSE,
+
+        VOXEL_INFO,
 
         CHAT_MESSAGE,
 
@@ -25,7 +29,7 @@ namespace voxl
     {
         virtual ~IPacket() = default;
         IPacket(PacketType a_Type) : type(a_Type) {}
-        PacketType type;
+        const PacketType type;
     };
 
     /*
@@ -69,5 +73,39 @@ namespace voxl
 
         //The message.
         char message[255];
+    };
+
+    /*
+     * Request information of a specific type.
+     */
+    struct Packet_Request : public PacketBase<PacketType::REQUEST>
+    {
+        //The requested data packet.
+        PacketType requested;
+
+        /*
+         * Information about the request, stored as several data types in a union.
+         * This can be interpreted by the received however it wants.
+         */
+        union
+        {
+            float floats[16];
+            int ints[16];
+            short shorts[32];
+            long longs[8];
+            unsigned uints[16];
+            unsigned short uShorts[32];
+        };
+    };
+
+    /*
+     * Packet containing the voxel information json file.
+     */
+    struct Packet_VoxelInfo : public PacketBase<PacketType::VOXEL_INFO>
+    {
+        /*
+         * The size of the 
+         */
+        size_t size;
     };
 }

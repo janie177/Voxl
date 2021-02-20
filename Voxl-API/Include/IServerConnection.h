@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <functional>
 
 #include "ConnectionState.h"
 #include "IConnection.h"
@@ -32,5 +33,13 @@ namespace voxl
          * Called to process all packets that have been queued up.
          */
         virtual void ProcessPackets() = 0;
+
+        /*
+         * Wait for a specific packet.
+         * This will discard other packets.
+         * If no packets have been received before the timeout time is reached, false is returned.
+         * If a packet was received, true is returned and the registered callback will be executed.
+         */
+        virtual bool WaitForPacket(PacketType a_Type, std::uint32_t a_TimeOutMillis, std::function<void(IPacket* a_Packet)> a_OnReceive) = 0;
     };
 }

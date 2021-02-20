@@ -31,7 +31,7 @@ namespace voxl
         bool Connect(const std::string& a_Ip, std::uint32_t a_Port, const Packet_Authenticate& a_Authentication) override;
         IPacketManager& GetPacketManager() override;
         void ProcessPackets() override;
-
+        bool WaitForPacket(PacketType a_Type, std::uint32_t a_TimeOutMillis, std::function<void(IPacket* a_Packet)> a_OnReceive) override;
     private:
         ENetPeer* m_Server;
         ENetHost* m_Client;

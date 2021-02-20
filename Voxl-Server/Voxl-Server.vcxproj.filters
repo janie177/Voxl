@@ -83,5 +83,8 @@
     <ClInclude Include="PacketHandler_ChatMessage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PacketHandler_Request.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,1 +1,31 @@
-{"voxelTypes":[{"animationFrames":0,"collision":true,"emissiveLight":0,"id":0,"mesh":false,"name":"Kevin","passThroughSpeed":255,"strength":1,"textureIndex":0,"transparent":false}]}
+{
+"voxelTypes":
+[
+	{
+		"id":0,
+		"name":"Air",
+		"description":"Nothing but air.",
+		"animationFrames":0,
+		"collision":true,
+		"emissiveLight":0,
+		"mesh":false,
+		"passThroughSpeed":255,
+		"strength":1,
+		"textureIndex":0,
+		"transparent":false
+	},
+	
+	{
+		"id":1,
+		"name":"Stone",
+		"description":"Rock bottom.",
+		"animationFrames":0,
+		"collision":true,
+		"emissiveLight":0,
+		"mesh":false,
+		"passThroughSpeed":255,
+		"strength":1,
+		"textureIndex":0,
+		"transparent":false
+	}
+]}

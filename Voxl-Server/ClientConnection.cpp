@@ -64,4 +64,14 @@ namespace voxl
         assert(a_Name.length() <= 255);
         m_Username = a_Name;
     }
+
+    std::shared_ptr<PlayerController> ClientConnection::GetController()
+    {
+        return m_Controller;
+    }
+
+    void ClientConnection::SetController(std::shared_ptr<PlayerController>& a_Controller)
+    {
+        m_Controller = a_Controller;
+    }
 }

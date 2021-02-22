@@ -8,6 +8,7 @@
  */
 constexpr int CHUNK_SIZE = 16;       //The size of a chunk in voxels in all dimensions.
 constexpr int CHUNK_SIZE_SQUARED = CHUNK_SIZE * CHUNK_SIZE;
+constexpr int CHUNK_SIZE_CUBED = CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE;
 
 namespace voxl
 {

@@ -23,8 +23,10 @@
 #include "PacketHandler_ChatMessage.h"
 #include "time/GameLoop.h"
 #include "World.h"
-#include "ConnectionManager.h"
+#include "PacketHandler_ChunkSubscribe.h"
+#include "PacketHandler_ChunkUnsubscribe.h"
 #include "PacketHandler_Request.h"
+#include "PacketHandler_VoxelUpdate.h"
 
 
 #define VOXEL_TYPES_FILE_NAME "voxeltypes.json"
@@ -52,11 +54,16 @@ namespace voxl
         m_ConnectionManager->ProcessClientConnections();
 
         /*
+         * Update each of the gamemodes
+         */
+
+
+        /*
          * Update each of the worlds.
          */
-        for(auto& world : GetWorlds())
+        for(auto& world : m_Worlds)
         {
-            world->Tick(a_DeltaTime);
+            world.second->Tick(a_DeltaTime);
         }
     }
 
@@ -134,26 +141,60 @@ namespace voxl
             }
 
             //Register the default world generator and default gamemode.
-            RegisterGameMode("default", std::make_unique<DefaultGameMode>());
             std::shared_ptr<IWorldGenerator> generator = std::make_shared<DefaultWorldGenerator>();
             RegisterWorldGenerator("default", generator);
+            std::shared_ptr<IGameMode> defGm = std::make_shared<DefaultGameMode>();
+            RegisterGameMode("default", defGm);
 
-            //Load the default worlds.
-            for(auto & world : m_Settings.defaultWorlds)
+
+            /*
+             * Initialize the gamemodes and worlds configured.
+             */
+            for(auto & gameMode : m_Settings.gameModes)
             {
-                if(WorldExists(world))
+                //Create the gamemode instance.
+                auto ptr = CreateGamemode(gameMode.gameMode);
+                if(ptr == nullptr)
                 {
-                    //Exists on disk but not in memory.
-                    if(GetWorld(world) == nullptr)
+                    m_Logger->log(utilities::Severity::Fatal, "Gamemode defined in server settings '" + gameMode.gameMode + "' does not exist.");
+                    return;
+                }
+
+                //Create the worlds configured.
+                for(auto& world : gameMode.worlds)
+                {
+                    IWorld* worldPtr;
+                    if (WorldExists(world))
                     {
-                        LoadWorld(world);
+                        //Exists on disk but not in memory.
+                        if ((worldPtr = GetWorld(world)) == nullptr)
+                        {
+                            worldPtr = LoadWorld(world);
+
+                        }
+                        else
+                        {
+                            m_Logger->log(utilities::Severity::Fatal, "World defined for gamemode '" + gameMode.gameMode + "' was already loaded! Defined for multiple gamemodes?");
+                            return;
+                        }
                     }
+                    else
+                    {
+                        //Create a world with default settings.
+                        worldPtr = CreateWorld(WorldSettings());
+                    }
+
+                    if(worldPtr == nullptr)
+                    {
+                        m_Logger->log(utilities::Severity::Fatal, "World defined for gamemode '" + gameMode.gameMode + "' could not be loaded.");
+                        return;
+                    }
+
+                    //Set the gamemode for the world.
+                    worldPtr->SetGameMode(ptr);
                 }
-                else
-                {
-                    //Create a world with default settings.
-                    CreateWorld(WorldSettings());
-                }
+
+
             }
 
             //Setup the connection server
@@ -179,10 +220,16 @@ namespace voxl
         /*
          * Register packet handlers
          */
+        //Player connection and chat
         auto& packetManager = m_ConnectionManager->GetPacketManager();
         packetManager.Register(PacketType::AUTHENTICATE, std::make_unique<PacketHandler_Authenticate>(*m_ConnectionManager));   //Authenticates a user.
         packetManager.Register(PacketType::CHAT_MESSAGE, std::make_unique<PacketHandler_ChatMessage>(*m_ConnectionManager));    //Distributes chat messages    
         packetManager.Register(PacketType::REQUEST, std::make_unique<PacketHandler_Request>(m_VoxelInfoFile));                  //Handles any sort of request.
+
+        //Chunk data related.
+        packetManager.Register(PacketType::CHUNK_SUBSCRIBE, std::make_unique<PacketHandler_ChunkSubscribe>());
+        packetManager.Register(PacketType::CHUNK_UNSUBSCRIBE, std::make_unique<PacketHandler_ChunkUnsubscribe>());
+        packetManager.Register(PacketType::VOXEL_UPDATE, std::make_unique<PacketHandler_VoxelUpdate>());
 
         /*
          * Main game loop.
@@ -291,9 +338,10 @@ namespace voxl
         return false;
     }
 
-    void Server::RegisterGameMode(const std::string& a_Name, std::unique_ptr<IGameMode>&& a_GameMode)
+    void Server::RegisterGameMode(const std::string& a_Name, std::shared_ptr<IGameMode>& a_GameMode)
     {
-        m_GameModes.insert(std::make_pair(a_Name, std::move(a_GameMode)));
+        a_GameMode->Load();
+        m_GameModes.insert(std::make_pair(a_Name, a_GameMode));
     }
 
     IWorld* Server::CreateWorld(const WorldSettings& a_Settings)
@@ -386,13 +434,12 @@ namespace voxl
         return nullptr;
     }
 
-    std::unique_ptr<IGameMode> Server::CreateGameMode(const std::string& a_Name)
+    std::shared_ptr<IGameMode> Server::CreateGamemode(const std::string& a_Name)
     {
-        auto found = m_GameModes.find(a_Name);
+        const auto found = m_GameModes.find(a_Name);
         if(found != m_GameModes.end())
         {
-            auto clone = found->second->Clone();
-            return clone;
+            return found->second;
         }
         return nullptr;
     }
@@ -468,6 +515,13 @@ namespace voxl
             nlohmann::json file = nlohmann::json::parse(inStream);
             const ServerSettings defaultSettings;
 
+            nlohmann::basic_json<> gameModes;
+            if (file.is_discarded() || !JsonUtilities::VerifyValue("gameModes", file, gameModes) || gameModes.empty())
+            {
+                std::cout << "Could not load server settings file. Invalid Json format." << std::endl;
+                return false;
+            }
+
             if (!JsonUtilities::VerifyValue("tps", file, m_Settings.tps) || m_Settings.tps <= 0)
             {
                 m_Logger->log(utilities::Severity::Warning, "Tps not defined in server settings. Default value restored.");
@@ -478,11 +532,6 @@ namespace voxl
             {
                 m_Logger->log(utilities::Severity::Warning, "World directory not defined in server settings. Default value restored.");
                 m_Settings.worldsDirectory = defaultSettings.worldsDirectory;
-            }
-
-            if (!JsonUtilities::VerifyValue("defaultWorlds", file, m_Settings.defaultWorlds))
-            {
-                m_Logger->log(utilities::Severity::Warning, "No default worlds configured defined in server settings.");
             }
 
             if (!JsonUtilities::VerifyValue("maximumConnections", file, m_Settings.maximumConnections) || m_Settings.maximumConnections <= 0)
@@ -501,6 +550,22 @@ namespace voxl
                 m_Logger->log(utilities::Severity::Warning, "Port not configured in settings. Default value restored.");
                 m_Settings.port = defaultSettings.port;
             }
+
+            /*
+             * Load gamemodes.
+             */
+            m_Settings.gameModes.resize(gameModes.size());
+
+            //Extract the gamemodes from the file.
+            int i = 0;
+            for(auto const& gameMode : gameModes)
+            {
+                GameModeSettings gameModeSettings;
+                JsonUtilities::VerifyValue("gameMode", gameMode, gameModeSettings.gameMode);
+                JsonUtilities::VerifyValue("worlds", gameMode, gameModeSettings.worlds);
+                m_Settings.gameModes[i] = gameModeSettings;
+                ++i;
+            }
         }
 
         //Store in case defaults were reset.
@@ -514,10 +579,19 @@ namespace voxl
         nlohmann::json file;
         file["tps"] = a_Settings.tps;
         file["worldsDirectory"] = a_Settings.worldsDirectory;
-        file["defaultWorlds"] = a_Settings.defaultWorlds;
         file["maximumConnections"] = a_Settings.maximumConnections;
         file["ip"] = a_Settings.ip;
         file["port"] = a_Settings.port;
+
+        //Create an array of gamemodes, containing gamemode objects which each contain a name and a list of worlds.
+        auto gamemodes = nlohmann::json::array();
+        auto gamemode = nlohmann::json::object();
+        auto worlds = nlohmann::json::array();
+        worlds.push_back("world");
+        gamemode["gameMode"] = "default";
+        gamemode["worlds"] = worlds;
+        gamemodes.push_back(gamemode);
+        file["gameModes"] = gamemodes;
 
         //Write to file.
         std::ofstream stream(SERVER_SETTINGS_FILE_NAME);

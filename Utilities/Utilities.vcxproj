@@ -55,7 +55,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Include;$(SolutionDir)Dependencies/Include/glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -71,7 +71,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Include;$(SolutionDir)Dependencies/Include/glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -89,6 +89,7 @@
     <ClCompile Include="src\InputQueue.cpp" />
     <ClCompile Include="src\Mouse.cpp" />
     <ClCompile Include="src\Timer.cpp" />
+    <ClCompile Include="src\Transform.cpp" />
     <ClCompile Include="src\TypelessPool.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -104,6 +105,7 @@
     <ClInclude Include="Include\memory\TypelessPool.h" />
     <ClInclude Include="Include\other\KeyCodes.h" />
     <ClInclude Include="Include\other\ServiceLocator.h" />
+    <ClInclude Include="Include\other\Transform.h" />
     <ClInclude Include="Include\state\BaseState.h" />
     <ClInclude Include="Include\state\FSM.h" />
     <ClInclude Include="Include\threads\ThreadPool.h" />

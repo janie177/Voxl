@@ -5,6 +5,8 @@
 
 #include "logging/Logger.h"
 
+#define GAMEMODES_FOLDER "gamemodes"
+
 namespace voxl
 {
     struct WorldSettings;
@@ -16,6 +18,8 @@ namespace voxl
     class IClientConnection;
     class IPacketManager;
     class IConnectionManager;
+
+    struct GameSettings;
 
     enum class ServerState
     {
@@ -29,11 +33,9 @@ namespace voxl
         //The ticks per second at which the server processes information.
         std::uint32_t tps = 32;
 
-        //The directory where worlds are stored.
-        std::string worldsDirectory = "worlds";
-
-        //Worlds that are loaded by default.
-        std::vector<std::string> defaultWorlds{"world"};
+        //A list of games this server hosts.
+        //The first game is default for now.
+        std::vector<std::string> games{"default"};
 
         //Maximum number of connections.
         std::uint32_t maximumConnections = 128;
@@ -84,66 +86,16 @@ namespace voxl
         virtual void CreateSettingsFile(const ServerSettings& a_Settings) = 0;
 
         /*
-         * Try to load the voxel data file.
-         * If no file was exists, returns false. True if file loaded successfully.
-         */
-        virtual bool LoadVoxelTypesFile() = 0;
-
-        /*
-         * Create the default voxel data file.
-         */
-        virtual void CreateVoxelTypesFile() = 0;
-
-        /*
-         * Get the world with the given name.
-         * When no world was loaded for the given name, nullptr is returned.
-         */
-        virtual IWorld* GetWorld(const std::string& a_Name) = 0;
-
-        /*
-         * Unload a world from memory.
-         */
-        virtual bool UnloadWorld(const std::string& a_Name, bool a_Save) = 0;
-
-        /*
-         * Load a world from file.
-         * Returns a pointer to the loaded world if existing.
-         * Returns nullptr otherwise.
-         */
-        virtual IWorld* LoadWorld(const std::string& a_Name) = 0;
-
-        /*
-         * Returns true if the world exists on disk or in memory.
-         */
-        virtual bool WorldExists(const std::string& a_Name) = 0;
-
-        /*
-         * Create a new world.
-         * Returns a pointer to the created world.
-         * If a world with the given name already exists, returns nullptr.
-         */
-        virtual IWorld* CreateWorld(const WorldSettings& a_Settings) = 0;
-
-        /*
-         * Delete a world forever.
-         * Returns true if the world existed and has been removed, false otherwise.
-         */
-        virtual bool DeleteWorld(const std::string& a_Name) = 0;
-
-        /*
-         * Get all worlds that are currently loaded.
-         */
-        virtual std::vector<IWorld*> GetWorlds() = 0;
-
-        /*
          * Register a world generator with the given name.
          */
         virtual void RegisterWorldGenerator(const std::string& a_Name, std::shared_ptr<IWorldGenerator>& a_Generator) = 0;
 
         /*
          * Register a gamemode with the server using the given name as handle.
+         * This instance can be assigned to worlds using that name.
+         *
          */
-        virtual void RegisterGameMode(const std::string& a_Name, std::unique_ptr<IGameMode>&& a_GameMode) = 0;
+        virtual void RegisterGameMode(const std::string& a_Name, std::shared_ptr<IGameMode>& a_GameMode) = 0;
 
         /*
          * Get the world generator registered with the given name.
@@ -152,15 +104,35 @@ namespace voxl
         virtual std::shared_ptr<IWorldGenerator> GetWorldGenerator(const std::string& a_Name) = 0;
 
         /*
-         * Create a gamemode instance of the gamemode registered with the given name.
-         * If no gamemode was found, returns nullptr.
+         * Create a new instacne of the gamemode registered with the given name.
+         * If no gamemode was registered with that name, return nullptr.
          */
-        virtual std::unique_ptr<IGameMode> CreateGameMode(const std::string& a_Name) = 0;
+        virtual std::shared_ptr<IGameMode> CreateGamemode(const std::string& a_Name) = 0;
 
         /*
-         * Get a reference to the voxel registry.
+         * Create a new game from the given settings.
          */
-        virtual VoxelRegistry& GetVoxelRegistry() = 0;
+        virtual std::shared_ptr<IGame> CreateGame(const GameSettings& a_Settings) = 0;
+
+        /*
+         * Load the game with the given name.
+         */
+        virtual bool LoadGame(const std::string& a_Name) = 0;
+
+        /*
+         * Unload the game with the given name.
+         */
+        virtual bool UnloadGame(const std::string& a_Name) = 0;
+
+        /*
+         * Delete the game with the given name forever.
+         */
+        virtual bool DeleteGame(const std::string& a_Name) = 0;
+
+        /*
+         * Get all currently active games.
+         */
+        virtual std::vector<std::shared_ptr<IGame>> GetGames() = 0;
 
         /*
          * Get the logger for the server.

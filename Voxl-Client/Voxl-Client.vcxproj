@@ -92,6 +92,7 @@
     <ClCompile Include="ClientChunkStore.cpp" />
     <ClCompile Include="ClientPacketManager.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="PacketHandler_ChunkVoxelData.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ServerConnection.cpp" />
     <ClCompile Include="SkeletalMesh.cpp" />
@@ -105,6 +106,7 @@
     <ClInclude Include="ClientChunkStore.h" />
     <ClInclude Include="ClientPacketManager.h" />
     <ClInclude Include="JsonUtilities.h" />
+    <ClInclude Include="PacketHandler_ChunkVoxelData.h" />
     <ClInclude Include="PacketHandler_IncomingMessage.h" />
     <ClInclude Include="PacketHandler_VoxelInfo.h" />
     <ClInclude Include="Renderer.h" />

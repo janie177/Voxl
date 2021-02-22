@@ -84,18 +84,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Chunk.cpp" />
     <ClCompile Include="ChunkStore.cpp" />
     <ClCompile Include="ClientConnection.cpp" />
     <ClCompile Include="ConnectionManager.cpp" />
     <ClCompile Include="DefaultGameMode.cpp" />
     <ClCompile Include="DefaultWorldGenerator.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="PacketHandler_ChunkSubscribe.cpp" />
+    <ClCompile Include="PacketHandler_ChunkUnsubscribe.cpp" />
+    <ClCompile Include="PacketHandler_VoxelUpdate.cpp" />
     <ClCompile Include="PacketManager.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="VoxelEditor.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Chunk.h" />
     <ClInclude Include="ChunkStore.h" />
     <ClInclude Include="ClientConnection.h" />
     <ClInclude Include="ConnectionManager.h" />
@@ -104,8 +110,13 @@
     <ClInclude Include="JsonUtilities.h" />
     <ClInclude Include="PacketHandler_Authenticate.h" />
     <ClInclude Include="PacketHandler_ChatMessage.h" />
+    <ClInclude Include="PacketHandler_ChunkSubscribe.h" />
+    <ClInclude Include="PacketHandler_ChunkUnsubscribe.h" />
     <ClInclude Include="PacketHandler_Request.h" />
+    <ClInclude Include="PacketHandler_VoxelUpdate.h" />
     <ClInclude Include="PacketManager.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="PlayerController.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="VoxelEditor.h" />
     <ClInclude Include="World.h" />

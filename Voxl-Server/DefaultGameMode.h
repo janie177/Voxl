@@ -6,10 +6,11 @@ namespace voxl
     class DefaultGameMode : public IGameMode
     {
     public:
-        void Tick(double a_DeltaTime, IWorld& a_World) override;
-        void Save(IWorld& a_World) override;
-        void Load(IWorld& a_World) override;
-        std::unique_ptr<IGameMode> Clone() override;
+        void Tick(double a_DeltaTime) override;
+        void Save() override;
+        void Load() override;
         std::string GetName() const override;
+        void RegisterWorld(IWorld* a_World) override;
+        void UnregisterWorld(IWorld* a_World) override;
     };
 }

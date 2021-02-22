@@ -1,0 +1,62 @@
+[Tasks]
+	[Client]
+		[ChunkLoader]
+			- Determines which chunk coordinates are not loaded yet, and adds them to chunk registry.
+			- Sends chunk subscribe packet to server so that player will receive updates for chunk.
+			- Unloads chunks no longer needed. Send packet to server to unsubsribe player from chunk.
+			- Chunks are default marked as dirty and state is set to loading or something.
+			- Smart algorithm that loads chunks based on visibility (along view frustum).
+			- Chunks that are marked as loaded that have not yet received an update
+			  after a while will be re-subscribed in case the packet didn't get to the server.
+			
+		[ChunkRegistry]
+			- Keep meshes for chunks but remove local data to save memory.
+			- Some sort of packet to request chunk data again when locally unloaded.
+			- Could keep the chunks and their data separate in a memory pool.
+			  This would allow for high render distance with low memory usage.
+			
+		[ChunkPacket]
+			- When a chunk/block update packet is received, overwrite the correct chunk data and mark as dirty.
+			- Send block change packets to the server to update chunks.
+			  Server may approve or deny update depending on player status.
+			  When denied, block change packet is sent back to client to roll back changes.
+			  When approved, all other clients subscribed to the chunk get the block update.
+			
+		[Rendering]
+			- Chunks marked as dirty will have their mesh rebuilt.
+			- Prioritize chunks close to the player.
+			- Local changes update the chunk directly. Rebuild mesh on roll back.
+			- Rebuilding has to happen async so that current mesh is still displayed while new one is created.
+			- Setup D3D12.
+			
+		[Entities]
+			- Local list of entities.
+			- Server sends updates (entity update, add, remove).
+			- Client renders all entities but can do some culling. Entity state is taken into account.
+			
+	[Server]
+		[ChunkLoader]
+			- When a chunk subscribe event is received, chunk registry is checked for the chunk.
+			- Add player to the chunk if it exists, otherwise add new chunk and add player.
+			  Load chunk from disk and then send chunk data update to subscribed clients once loading is done.
+			  Load async.
+		[Chunk Update]
+			- When player sends block changes, check if valid and then approve and spread or roll back and send to player.
+			
+		[Entities]
+			- Entities are stored per chunk.
+			- Players are stored per world.
+			- Entities update with the chunks update tick.
+			- When an entity moves, check if target is new chunk and if it's loaded.
+			  If not loaded, cancel, otherwise move to other chunk.
+			- When player subscribes to chunk, they also receive all entity updates from that chunk.
+			
+		[Gameplay]
+			- Configurable default world.
+			- Player object linked to a connection that can join a world and leave it.
+			  Can be saved to file.
+			- Default world generator generation.
+			
+			
+			
+			

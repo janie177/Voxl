@@ -11,16 +11,19 @@
 #include <logging/Logger.h>
 #include <other/ServiceLocator.h>
 
+#include "ClientConnection.h"
 
 #include "ChunkStore.h"
 #include "file/FileUtilities.h"
 #include "JsonUtilities.h"
 #include "VoxelEditor.h"
 
+#undef CreateFile
+
 namespace voxl
 {
 
-    World::World(const std::string& a_Name, const std::string& a_WorldDirectory) : m_Loaded(false), m_WorldDirectory(a_WorldDirectory)
+    World::World(const std::string& a_Name) : m_Loaded(false)
     {
         m_Settings.name = a_Name;
     }
@@ -42,17 +45,6 @@ namespace voxl
             return;
         }
 
-        //Save the gamemode data.
-        m_GameMode->Save(*this);
-
-        //Only save the world if enabled.
-        if(!m_Settings.enableSaving)
-        {
-            return;
-        }
-
-        //TODO save all players to their player directory m_Settings.playerDirectory.
-
         SaveWorldSettings(m_Settings);
 
         //Save each chunk as well.
@@ -70,7 +62,7 @@ namespace voxl
             return;
         }
 
-        //TODO move all players away to another world.
+        //TODO ensure players are added to another world.
 
         //Unload all the chunks.
         m_ChunkStore->UnloadAll();
@@ -79,7 +71,7 @@ namespace voxl
     bool World::Load(IServer& a_Server)
     {
         //Load the level data json file.
-        const auto fileName = m_WorldDirectory + "/" + m_Settings.name + "/" + LEVEL_DATA_FILE_NAME;
+        const auto fileName = "worlds/" + m_Settings.name + "/" + LEVEL_DATA_FILE_NAME;
         if (utilities::FileUtilities::FileExists(fileName))
         {
             std::ifstream ifs(fileName);
@@ -97,27 +89,15 @@ namespace voxl
                 return false;
             }
 
-            if (!JsonUtilities::VerifyValue("playersDirectory", json, m_Settings.playersDirectory) || m_Settings.playersDirectory.empty())
-            {
-                utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Error, "Tried to load world '" + m_Settings.name + "' that does not have a valid players directory defined.");
-                return false;
-            }
-
             if (!JsonUtilities::VerifyValue("seed", json, m_Settings.seed))
             {
                 utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Error, "Tried to load world '" + m_Settings.name + "' that does not have a valid seed defined.");
                 return false;
             }
 
-            if (!JsonUtilities::VerifyValue("gamemode", json, m_Settings.gameMode) || m_Settings.gameMode.empty())
+            if (!JsonUtilities::VerifyValue("renderDistance", json, m_Settings.renderDistance))
             {
-                utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Error, "Tried to load world '" + m_Settings.name + "' that does not have a valid game-mode defined.");
-                return false;
-            }
-
-            if (!JsonUtilities::VerifyValue("enableSaving", json, m_Settings.enableSaving))
-            {
-                utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Error, "Tried to load world '" + m_Settings.name + "' that does not have a valid saving boolean defined.");
+                utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Error, "Tried to load world '" + m_Settings.name + "' that does not have a valid render distance defined.");
                 return false;
             }
         }
@@ -128,15 +108,6 @@ namespace voxl
             utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Error, "Tried to load world '" + m_Settings.name + "' that does not have a valid levelData file.");
             return false;
         }
-
-        //Load data the game-mode may require.
-        m_GameMode = a_Server.CreateGameMode(m_Settings.gameMode);
-        if (m_GameMode == nullptr)
-        {
-            utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Error, "World '" + m_Settings.name + "' does not have a valid game-mode '" + m_Settings.gameMode + "'.");
-            return false;
-        }
-        m_GameMode->Load(*this);
 
         //Get the generator.
         m_Generator = a_Server.GetWorldGenerator(m_Settings.generator);
@@ -168,27 +139,60 @@ namespace voxl
         //Apply pending updates to the world.
         m_VoxelEditor->ApplyPendingChanges(*m_ChunkStore);
 
-        //TODO update players in the world.
+        //Spawn entities queued for spawning.
+        for(auto& entity : m_EntityQueue)
+        {
+            AddEntity(std::move(entity));
+        }
+        m_EntityQueue.clear();
+
+        //Update players in the world.
+        auto player = m_Players.begin();
+        while(player != m_Players.end())
+        {
+            if(player->second->IsMarkedForDestroy())
+            {
+                //TODO remove from chunk.
+                player = m_Players.erase(player);
+            }
+            else
+            {
+                player->second->Tick(a_DeltaTime);
+                ++player;
+            }
+        }
+
+        //Update all entities.
+        auto entity = m_Entities.begin();
+        while (entity != m_Entities.end())
+        {
+            if (entity->second->IsMarkedForDestroy())
+            {
+                //TODO remove from chunks.
+                entity = m_Entities.erase(entity);
+            }
+            else
+            {
+                entity->second->Tick(a_DeltaTime);
+                ++entity;
+            }
+        }
 
         for(auto& chunk : *m_ChunkStore)
         {
-            //TODO ensure that chunks are ready and not generating or anything. Chunk loading is already handled by the incoming packets from players.
-            //TODO check connected clients per chunk, and update them based on distance.
-            //TODO then save and unload chunks that are no longer active.
+            //TODO Check connected clients per chunk.
+            //TODO Save chunks with no active connections.
+            //TODO check every connection for every chunk to see if it's still valid.
+            //TODO Check if still controlling an entity that is near the chunk (world render distance).
+            //TODO if not remove the player.
 
-            //TODO update entities and other logic if chunk is still loaded.
-            
+            //Tick all chunks that are ready to be ticked.
+            if(chunk.GetState() == ChunkState::READY)
+            {
+                //Tick the chunk.
+                chunk.Tick(a_DeltaTime);
+            }
         }
-
-        m_GameMode->Tick(a_DeltaTime, *this);
-    }
-
-    void World::SetGameMode(std::unique_ptr<IGameMode>&& a_GameMode)
-    {
-        m_GameMode->Save(*this);
-        m_GameMode = std::move(a_GameMode);
-        m_GameMode->Load(*this);
-        m_Settings.gameMode = m_GameMode->GetName();
     }
 
     void World::SetWorldGenerator(std::shared_ptr<IWorldGenerator>& a_Generator)
@@ -253,15 +257,54 @@ namespace voxl
         nlohmann::json json;
         json["name"] = m_Settings.name;
         json["generator"] = m_Settings.generator;
-        json["playersDirectory"] = m_Settings.playersDirectory;
         json["seed"] = m_Settings.seed;
-        json["gamemode"] = m_Settings.gameMode;
-        json["enableSaving"] = m_Settings.enableSaving;
+        json["renderDistance"] = m_Settings.renderDistance;
 
         //Write to disk.
-        const std::string path = m_WorldDirectory + "/" + m_Settings.name + "/" + LEVEL_DATA_FILE_NAME;
+        const std::string path = "worlds/" + m_Settings.name + "/" + LEVEL_DATA_FILE_NAME;
         utilities::FileUtilities::CreateFile(path);
         std::ofstream dataFile(path);
         dataFile << json;
+    }
+
+    IEntity& World::AddEntity(std::unique_ptr<IEntity>&& a_Entity)
+    {
+        //TODO add to chunk.
+
+        const auto id = a_Entity->GetUniqueId();
+        const auto result = m_Entities.insert(std::make_pair(id, std::move(a_Entity)));
+        return *(result.first->second);
+    }
+
+    IPlayer& World::AddPlayer(std::unique_ptr<IPlayer>&& a_Player)
+    {
+        const auto id = a_Player->GetUniqueId();
+        const auto result = m_Players.insert(std::make_pair(id, std::move(a_Player)));
+        return *(result.first->second);
+    }
+
+    void World::QueueEntityAdd(std::unique_ptr<IEntity>&& a_Entity)
+    {
+        m_EntityQueue.emplace_back(std::move(a_Entity));
+    }
+
+    IEntity* World::GetEntity(std::uint64_t a_Id)
+    {
+        const auto found = m_Entities.find(a_Id);
+        if (found != m_Entities.end())
+        {
+            return found->second.get();
+        }
+        return nullptr;
+    }
+
+    IPlayer* World::GetPlayer(std::uint64_t a_Id)
+    {
+        const auto found = m_Players.find(a_Id);
+        if(found != m_Players.end())
+        {
+            return found->second.get();
+        }
+        return nullptr;
     }
 }

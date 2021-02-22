@@ -1,4 +1,7 @@
 #pragma once
+#include "VoxelData.h"
+
+#include "Utility.h"
 
 namespace voxl
 {
@@ -8,15 +11,20 @@ namespace voxl
      */
     enum class PacketType
     {
-        AUTHENTICATE = 0,
+        AUTHENTICATE = 0,           //Player attempting to authenticate with a server.
 
-        REQUEST,
+        REQUEST,                    //An arbitrary request that requires the server to respond in a way. Allows some small data to be transmitted and interpreted as needed.
 
-        AUTHENTICATION_RESPONSE,
+        AUTHENTICATION_RESPONSE,    //Approval or denial by the server when a player tries authenticating.
 
-        VOXEL_INFO,
+        CHUNK_SUBSCRIBE,    //Player subscribes to a chunk.
+        CHUNK_VOXEL_DATA,   //All voxel data in a chunk.
+        VOXEL_UPDATE,       //A voxel change in a chunk.
+        CHUNK_UNSUBSCRIBE,  //Player no longer subscribes to a chunk.
 
-        CHAT_MESSAGE,
+        VOXEL_INFO,         //All information about the voxels on a server.
+
+        CHAT_MESSAGE,       //A chat message
 
         //UNKNOWN packet is always the last one to determine the amount of packets.
         UNKNOWN,
@@ -107,5 +115,44 @@ namespace voxl
          * The size of the 
          */
         size_t size;
+    };
+
+    /*
+     * Sent by a player to the server when they want to receive updates from a chunk.
+     */
+    struct Packet_ChunkSubscribe : public PacketBase<PacketType::CHUNK_SUBSCRIBE>
+    {
+        //The coordinates of the chunk.
+        int coordinates[3];
+    };
+
+    /*
+     * Sent by the player to the server when they no longer want chunk updates.
+     */
+    struct Packet_ChunkUnsubscribe : public PacketBase<PacketType::CHUNK_UNSUBSCRIBE>
+    {
+        //The coordinates of the chunk.
+        int coordinates[3];
+    };
+
+    /*
+     * All voxel data from within a chunk.
+     */
+    struct Packet_ChunkVoxelData : public PacketBase<PacketType::CHUNK_VOXEL_DATA>
+    {
+        //The coordinates of the chunk.
+        int coordinates[3];
+
+        //The actual chunk data.
+        VoxelData data[CHUNK_SIZE_CUBED];
+    };
+
+    struct Packet_VoxelUpdate : public PacketBase<PacketType::VOXEL_UPDATE>
+    {
+        //The coordinates of the block.
+        int coordinatesBlock[3];
+
+        //The updated data.
+        VoxelData data;
     };
 }

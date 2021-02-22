@@ -1,23 +1,26 @@
 #pragma once
+#include <glm/glm.hpp>
 #include <memory>
 #include <string>
 
+#include "IEntity.h"
+
 namespace voxl
 {
+    enum class EntityType;
     class IServer;
     class IVoxelEditor;
     class IWorldGenerator;
     class IGameMode;
     class IChunkStore;
+    class IClientConnection;
 
     struct WorldSettings
     {
         std::string name = "world";                 //The name of the world (used to identify and lookup).
-        std::string playersDirectory = "players";   //The directory to save player files in. Relative to server root.
         std::uint64_t seed = 0;                     //Seed used for world generation.
         std::string generator = "default";          //World generator name.
-        std::string gameMode = "default";           //The gamemode name.
-        bool enableSaving = true;                   //True if saving should be enabled.
+        std::uint32_t renderDistance = 10;          //The radius around players at which chunks should load.
     };
 
     class IWorld
@@ -50,13 +53,6 @@ namespace voxl
          * Update the world.
          */
         virtual void Tick(double a_DeltaTime) = 0;
-
-        /*
-         * Set the worlds gamemode.
-         * This saves and then disables the previous gamemode.
-         * The new gamemode is then loaded.
-         */
-        virtual void SetGameMode(std::unique_ptr<IGameMode>&& a_GameMode) = 0;
 
         /*
          * Set the world generator that this world should use.
@@ -92,5 +88,41 @@ namespace voxl
          * Save the given world settings file for this world.
          */
         virtual void SaveWorldSettings(const WorldSettings& a_Settings) = 0;
+
+        /*
+         * Add a new player to the world.
+         * This adds the player object right away and can cause iterator invalidation.
+         * This should never be called during an active game loop.
+         *
+         * Returns a handle to the player after being inserted.
+         */
+        virtual IPlayer& AddPlayer(std::unique_ptr<IPlayer>&& a_Player) = 0;
+
+        /*
+         * Add a new entity to the world.
+         * The entity is added right away.
+         * This can cause iterator invalidation and should never be called during an active game loop.
+         *
+         * Returns a handle to the entity after being inserted.
+         */
+        virtual IEntity& AddEntity(std::unique_ptr<IEntity>&& a_Entity) = 0;
+
+        /*
+         * Queue an entity for spawn next game cycle.
+         * This delays the spawn and can be safely called from within the game cycle.
+         */
+        virtual void QueueEntityAdd(std::unique_ptr<IEntity>&& a_Entity) = 0;
+
+        /*
+         * Get the entity with the given ID.
+         * If no entity with that ID exists, returns nullptr.
+         */
+        virtual IEntity* GetEntity(std::uint64_t a_Id) = 0;
+
+        /*
+         * Get the player with the given ID.
+         * If no player with that ID exists, returns nullptr.
+         */
+        virtual IPlayer* GetPlayer(std::uint64_t a_Id) = 0;
     };
 }

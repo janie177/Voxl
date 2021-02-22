@@ -106,7 +106,13 @@
     <ClInclude Include="Include/ISkeletalMesh.h" />
     <ClInclude Include="Include/IStaticMesh.h" />
     <ClInclude Include="Include/IWindow.h" />
+    <ClInclude Include="Include\ClientRules.h" />
+    <ClInclude Include="Include\EntityRegistry.h" />
+    <ClInclude Include="Include\EntityType.h" />
     <ClInclude Include="Include\IConnectionManager.h" />
+    <ClInclude Include="Include\IEntity.h" />
+    <ClInclude Include="Include\IEntityController.h" />
+    <ClInclude Include="Include\IGame.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -48,6 +48,9 @@
     <ClCompile Include="ClientPacketManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PacketHandler_ChunkVoxelData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -87,6 +90,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PacketHandler_VoxelInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketHandler_ChunkVoxelData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

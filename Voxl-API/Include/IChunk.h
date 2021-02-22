@@ -30,9 +30,19 @@ namespace voxl
         virtual glm::ivec3 GetChunkCoordinates() = 0;
 
         /*
-         * Returns true when the chunk has finished loading or if something is still happening to it.
+         * Tick this chunk.
+         */
+        virtual void Tick(float a_DeltaTime) = 0;
+
+        /*
+         * Returns the current state of the chunk.
          */
         virtual ChunkState GetState() = 0;
+
+        /*
+         * Set the state of the chunk.
+         */
+        virtual void SetState(ChunkState a_State) = 0;
 
         /*
          * Get a pointer to the array of voxels in this chunk.

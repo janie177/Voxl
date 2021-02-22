@@ -28,12 +28,12 @@ namespace voxl
         std::vector<IWorld*> GetWorlds() override;
         void ShutDown(bool a_SaveAll) override;
         bool UnloadWorld(const std::string& a_Name, bool a_Save) override;
-        void RegisterGameMode(const std::string& a_Name, std::unique_ptr<IGameMode>&& a_GameMode) override;
+        void RegisterGameMode(const std::string& a_Name, std::shared_ptr<IGameMode>& a_GameMode) override;
         IWorld* CreateWorld(const WorldSettings& a_Settings) override;
         bool DeleteWorld(const std::string& a_Name) override;
         utilities::Logger& GetLogger() override;
         std::shared_ptr<IWorldGenerator> GetWorldGenerator(const std::string& a_Name) override;
-        std::unique_ptr<IGameMode> CreateGameMode(const std::string& a_Name) override;
+        std::shared_ptr<IGameMode> CreateGamemode(const std::string& a_Name) override;
         const ServerSettings& GetServerSettings() const override;
         IConnectionManager& GetConnectionManager() override;
         bool WorldExists(const std::string& a_Name) override;
@@ -57,11 +57,16 @@ namespace voxl
         std::unique_ptr<utilities::Logger> m_Logger;
 
         //Registries containing stuff.
-        std::map<std::string, std::unique_ptr<IWorld>> m_Worlds;
         std::map<std::string, std::shared_ptr<IWorldGenerator>> m_Generators;
-        std::map<std::string, std::unique_ptr<IGameMode>> m_GameModes;
+
+        //Map containing prototypes for each gamemode.
+        std::map<std::string, std::shared_ptr<IGameMode>> m_GameModeRegistry;
+
         std::unique_ptr<VoxelRegistry> m_VoxelRegistry;
         std::unique_ptr<ConnectionManager> m_ConnectionManager;
+
+        //The gamemode registry containing the actual gamemodes.
+        std::map<std::string, std::shared_ptr<IGameMode>> m_GameModes;
 
         //The voxel info file loaded from disk as chars.
         //This is in JSon format.

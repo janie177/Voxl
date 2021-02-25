@@ -23,14 +23,14 @@
 namespace voxl
 {
 
-    World::World(const std::string& a_Name) : m_Loaded(false)
+    World::World(const std::string& a_Name) : m_State(WorldState::UNLOADED)
     {
         m_Settings.name = a_Name;
     }
 
     const std::string& World::GetName()
     {
-        if (!m_Loaded)
+        if (m_State != WorldState::UNLOADED)
         {
             utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Error, "Can't retrieve name of world that was not yet loaded.");
         }
@@ -39,11 +39,16 @@ namespace voxl
 
     void World::Save()
     {
-        if(!m_Loaded)
+        if(m_State != WorldState::UNLOADED)
         {
             utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Error, "Can't save world that was not yet loaded.");
             return;
         }
+
+        //Mark as saving so that no tick will happen if checked.
+        m_State = WorldState::SAVING;
+
+        //TODO add a_Async bool to function and then run in other thread after changing state.
 
         SaveWorldSettings(m_Settings);
 
@@ -52,11 +57,13 @@ namespace voxl
         {
             chunk.Save(*this);
         }
+
+        m_State = WorldState::RUNNING;
     }
 
     void World::Unload()
     {
-        if (!m_Loaded)
+        if (m_State != WorldState::UNLOADED)
         {
             utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Error, "Can't unload a world that was not yet loaded.");
             return;
@@ -66,10 +73,21 @@ namespace voxl
 
         //Unload all the chunks.
         m_ChunkStore->UnloadAll();
+
+        m_State = WorldState::UNLOADED;
     }
 
     bool World::Load(IServer& a_Server)
     {
+        if(m_State != WorldState::UNLOADED)
+        {
+            utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Warning, "Tried to load world '" + m_Settings.name + "' that was not unloaded.");
+            return false;
+        }
+
+        //Mark as being loaded.
+        m_State = WorldState::LOADING;
+
         //Load the level data json file.
         const auto fileName = "worlds/" + m_Settings.name + "/" + LEVEL_DATA_FILE_NAME;
         if (utilities::FileUtilities::FileExists(fileName))
@@ -80,24 +98,28 @@ namespace voxl
             if(!JsonUtilities::VerifyValue("name", json, m_Settings.name) || m_Settings.name.empty())
             {
                 utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Error, "Tried to load world '" + m_Settings.name + "' that does not have a valid name defined.");
+                m_State = WorldState::UNLOADED;
                 return false;
             }
 
             if (!JsonUtilities::VerifyValue("generator", json, m_Settings.generator) || m_Settings.generator.empty())
             {
                 utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Error, "Tried to load world '" + m_Settings.name + "' that does not have a valid generator defined.");
+                m_State = WorldState::UNLOADED;
                 return false;
             }
 
             if (!JsonUtilities::VerifyValue("seed", json, m_Settings.seed))
             {
                 utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Error, "Tried to load world '" + m_Settings.name + "' that does not have a valid seed defined.");
+                m_State = WorldState::UNLOADED;
                 return false;
             }
 
             if (!JsonUtilities::VerifyValue("renderDistance", json, m_Settings.renderDistance))
             {
                 utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Error, "Tried to load world '" + m_Settings.name + "' that does not have a valid render distance defined.");
+                m_State = WorldState::UNLOADED;
                 return false;
             }
         }
@@ -106,6 +128,7 @@ namespace voxl
             //No LevelData file was found. To solve this create a new one manually.
             //This is not automatically resolved because generator and game-mode missing may do damage to the world.
             utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Error, "Tried to load world '" + m_Settings.name + "' that does not have a valid levelData file.");
+            m_State = WorldState::UNLOADED;
             return false;
         }
 
@@ -114,6 +137,7 @@ namespace voxl
         if(m_Generator == nullptr)
         {
             utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Error, "World '" + m_Settings.name + "' does not have a valid generator '" + m_Settings.generator + "'.");
+            m_State = WorldState::UNLOADED;
             return false;
         }
 
@@ -122,7 +146,7 @@ namespace voxl
         m_ChunkStore = std::make_unique<ChunkStore>();
 
         //Done!
-        m_Loaded = true;
+        m_State = WorldState::RUNNING;
         utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Info, "Successfully loaded world '" + m_Settings.name + "'.");
 
         return true;
@@ -130,7 +154,7 @@ namespace voxl
 
     void World::Tick(double a_DeltaTime)
     {
-        if (!m_Loaded)
+        if (m_State != WorldState::UNLOADED)
         {
             utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Error, "Can't tick world '" + m_Settings.name + "' that was not yet loaded.");
             return;
@@ -203,51 +227,51 @@ namespace voxl
 
     IWorldGenerator& World::GetWorldGenerator()
     {
-        if (!m_Loaded)
+        if (m_State == WorldState::UNLOADED)
         {
             utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Fatal, "Can't retrieve generator for world that was not yet loaded.");
+            assert(0);
         }
-        assert(m_Loaded);
         return *m_Generator;
     }
 
     IGameMode& World::GetGameMode()
     {
-        if (!m_Loaded)
+        if (m_State == WorldState::UNLOADED)
         {
             utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Fatal, "Can't retrieve game-mode for world that was not yet loaded.");
+            assert(0);
         }
-        assert(m_Loaded);
         return *m_GameMode;
     }
 
     IChunkStore& World::GetChunkStore()
     {
-        if (!m_Loaded)
+        if (m_State == WorldState::UNLOADED)
         {
             utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Fatal, "Can't retrieve chunk-store for world that was not yet loaded.");
+            assert(0);
         }
-        assert(m_Loaded);
         return *m_ChunkStore;
     }
 
     IVoxelEditor& World::GetVoxelEditor()
     {
-        if (!m_Loaded)
+        if (m_State == WorldState::UNLOADED)
         {
             utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Fatal, "Can't retrieve voxel-editor for world that was not yet loaded.");
+            assert(0);
         }
-        assert(m_Loaded);
         return *m_VoxelEditor;
     }
 
     const WorldSettings& World::GetSettings() const
     {
-        if (!m_Loaded)
+        if (m_State == WorldState::UNLOADED)
         {
             utilities::ServiceLocator<utilities::Logger>::getService().log(utilities::Severity::Fatal, "Can't retrieve settings for world that was not yet loaded.");
+            assert(0);
         }
-        assert(m_Loaded);
         return m_Settings;
     }
 
@@ -306,5 +330,10 @@ namespace voxl
             return found->second.get();
         }
         return nullptr;
+    }
+
+    WorldState World::GetWorldState() const
+    {
+        return m_State;
     }
 }

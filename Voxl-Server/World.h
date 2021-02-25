@@ -33,10 +33,10 @@ namespace voxl
         void QueueEntityAdd(std::unique_ptr<IEntity>&& a_Entity) override;
         IEntity* GetEntity(std::uint64_t a_Id) override;
         IPlayer* GetPlayer(std::uint64_t a_Id) override;
-
+        WorldState GetWorldState() const override;
 	private:
-        bool m_Loaded;
         WorldSettings m_Settings;
+        WorldState m_State;
 
         std::unique_ptr<IVoxelEditor> m_VoxelEditor;
         std::unique_ptr<IChunkStore> m_ChunkStore;

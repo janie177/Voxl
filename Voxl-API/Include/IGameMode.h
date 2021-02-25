@@ -10,6 +10,7 @@ namespace voxl
     class IGame;
     class VoxelRegistry;
     class EntityRegistry;
+    class IClientConnection;
 
     /*
      * A gamemode makes up the rules about how clients, blocks and entities behave.
@@ -75,6 +76,11 @@ namespace voxl
          * Get the name for this game-mode.
          */
         virtual std::string GetName() const = 0;
+
+        /*
+         * Shut down this gamemode.
+         */
+        virtual void Unload() = 0;
 
         /*
          * Try to load the voxel data file.

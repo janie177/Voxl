@@ -15,6 +15,17 @@ namespace voxl
     class IChunkStore;
     class IClientConnection;
 
+    /*
+     * Current status of the world.
+     */
+    enum class WorldState
+    {
+        LOADING,
+        RUNNING,
+        SAVING,
+        UNLOADED
+    };
+
     struct WorldSettings
     {
         std::string name = "world";                 //The name of the world (used to identify and lookup).
@@ -124,5 +135,10 @@ namespace voxl
          * If no player with that ID exists, returns nullptr.
          */
         virtual IPlayer* GetPlayer(std::uint64_t a_Id) = 0;
+
+        /*
+         * Get the state of this world.
+         */
+        virtual WorldState GetWorldState() const = 0;
     };
 }

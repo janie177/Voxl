@@ -90,6 +90,7 @@
     <ClCompile Include="ConnectionManager.cpp" />
     <ClCompile Include="DefaultGameMode.cpp" />
     <ClCompile Include="DefaultWorldGenerator.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PacketHandler_ChunkSubscribe.cpp" />
     <ClCompile Include="PacketHandler_ChunkUnsubscribe.cpp" />
@@ -107,6 +108,7 @@
     <ClInclude Include="ConnectionManager.h" />
     <ClInclude Include="DefaultGameMode.h" />
     <ClInclude Include="DefaultWorldGenerator.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="JsonUtilities.h" />
     <ClInclude Include="PacketHandler_Authenticate.h" />
     <ClInclude Include="PacketHandler_ChatMessage.h" />
